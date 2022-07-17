@@ -14,7 +14,7 @@ export type BloggerType = {
 
 export type CommentType = {
   id: string;
-  content: string;
+  content: string; //20<len<300
   postId: string;
   userId: string;
   userLogin: string;
@@ -41,6 +41,7 @@ export type ErrorMessageType = {
 
 export type UserType = {
   accountData: UserAccountType;
+  //loginAttempts: LoginAttemptType[],
   emailConfirmation: EmailConfirmationType;
 };
 

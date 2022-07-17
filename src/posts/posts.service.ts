@@ -1,26 +1,89 @@
+import { v4 as uuidv4 } from 'uuid';
 import { Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { EntityWithPaginationType, PostType } from '../types/types';
+import { PostsRepository } from './posts.repository';
 
 @Injectable()
 export class PostsService {
-  create(createPostDto: CreatePostDto) {
-    return 'This action adds a new post';
+  constructor(private postsRepository: PostsRepository) {}
+
+  async getPosts(
+    page: number,
+    pageSize: number,
+    searchNameTerm: string,
+    bloggerId: string | null,
+  ) {
+    const postsToSend = this.postsRepository.getPosts(
+      page,
+      pageSize,
+      searchNameTerm,
+      bloggerId,
+    );
+    return postsToSend;
   }
 
-  findAll() {
-    return `This action returns all posts`;
+  async getPostById(id: string): Promise<PostType | false> {
+    const post = this.postsRepository.getPostById(id);
+    if (post) {
+      return post;
+    } else return false;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} post`;
+  async createPost(newPostData: PostType): Promise<PostType | null> {
+    const postToCreate = {
+      ...newPostData,
+      id: uuidv4(),
+    };
+    return this.postsRepository.createPost(postToCreate);
   }
 
-  update(id: number, updatePostDto: UpdatePostDto) {
-    return `This action updates a #${id} post`;
+  async updatePostById(id: string, newPost: PostType) {
+    return this.postsRepository.updatePostById(id, newPost);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} post`;
+  async deletePostById(id: string): Promise<boolean> {
+    return this.postsRepository.deletePostById(id);
   }
 }
+
+export interface IPostsRepository {
+  getPosts(
+    page: number,
+    pageSize: number,
+    searchNameTerm: string,
+    bloggerId: string | null,
+  ): Promise<EntityWithPaginationType<PostType[]>>;
+
+  getPostById(id: string): Promise<PostType | false>;
+
+  createPost(newPostData: PostType): Promise<PostType | null>;
+
+  updatePostById(id: string, newPost: PostType): any;
+
+  deletePostById(id: string): Promise<boolean>;
+}
+
+// @Injectable()
+// export class PostsService {
+//   create(createPostDto: CreatePostDto) {
+//     return 'This action adds a new post';
+//   }
+//
+//   findAll() {
+//     return `This action returns all posts`;
+//   }
+//
+//   findOne(id: number) {
+//     return `This action returns a #${id} post`;
+//   }
+//
+//   update(id: number, updatePostDto: UpdatePostDto) {
+//     return `This action updates a #${id} post`;
+//   }
+//
+//   remove(id: number) {
+//     return `This action removes a #${id} post`;
+//   }
+// }
