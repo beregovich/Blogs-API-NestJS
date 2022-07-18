@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { BloggerType, EntityWithPaginationType } from '../types/types';
 import { BloggersRepository } from './bloggers.repository';
 
@@ -12,7 +12,13 @@ export class BloggersService {
   }
 
   async getBloggerById(id: string): Promise<BloggerType | null> {
-    return this.bloggersRepository.getBloggerById(id);
+    const blogger = this.bloggersRepository.getBloggerById(id);
+    if (!blogger)
+      throw new BadRequestException({
+        field: 'id',
+        message: 'blogger not found',
+      });
+    return blogger;
   }
 
   async createBlogger(name: string, youtubeUrl: string): Promise<BloggerType> {

@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { BloggersService } from './bloggers.service';
 import { Pagination } from '../common/pagination';
+import { CreateBloggerDto } from './dto/create-blogger.dto';
 
 @Controller('bloggers')
 export class BloggersController {
@@ -32,23 +33,17 @@ export class BloggersController {
   }
 
   @Get(':bloggerId/posts')
-  async getPostsByBloggerId(
-    @Param('id') id: string,
-    @Query('page') page: string,
-    @Query('pageSize') pageSize: string,
-    @Query('searchNameTerm') searchNameTerm: string,
-  ) {
+  async getPostsByBloggerId(@Param('id') id: string, @Query() query) {
+    const { page, pageSize, searchNameTerm } =
+      Pagination.getPaginationData(query);
     return "blogger's posts";
   }
 
   @Post()
-  async createBlogger(
-    @Body('name') name: string,
-    @Body('youtubeUrl') youtubeUrl: string,
-  ) {
+  async createBlogger(@Body() bloggerDto: CreateBloggerDto) {
     const newBlogger = await this.bloggersService.createBlogger(
-      name,
-      youtubeUrl,
+      bloggerDto.name,
+      bloggerDto.youtubeUrl,
     );
     return newBlogger;
   }

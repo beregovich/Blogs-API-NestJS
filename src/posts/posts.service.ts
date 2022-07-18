@@ -67,7 +67,7 @@ export interface IPostsRepository {
 
 // @Injectable()
 // export class PostsService {
-//   create(createPostDto: CreatePostDto) {
+//   create(createPostDto: CreateBloggerDto) {
 //     return 'This action adds a new post';
 //   }
 //
