@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { BloggersService } from './bloggers.service';
-import { Pagination } from '../common/pagination';
+import { Pagination } from '../common/pagination.service';
 import { CreateBloggerDto } from './dto/create-blogger.dto';
 
 @Controller('bloggers')

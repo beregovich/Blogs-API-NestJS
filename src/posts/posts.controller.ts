@@ -13,7 +13,7 @@ import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { CommentType, PostType } from '../types/types';
-import { Pagination } from '../common/pagination';
+import { Pagination } from '../common/pagination.service';
 
 @Controller('posts')
 export class PostsController {

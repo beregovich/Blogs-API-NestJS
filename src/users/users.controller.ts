@@ -1,34 +1,47 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Query,
+  HttpException,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { Pagination } from '../common/pagination.service';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
-
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
+  constructor(private usersService: UsersService) {}
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  async findAll(@Query() query) {
+    const { page, pageSize, searchNameTerm } =
+      Pagination.getPaginationData(query);
+    const users = await this.usersService.getUsers(
+      page,
+      pageSize,
+      searchNameTerm,
+    );
+    if (!users) throw new HttpException('Not found', 404);
+    return users;
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  @Post()
+  async create(@Body() createUserDto: CreateUserDto) {
+    const createdUser = await this.usersService.createUser(
+      createUserDto.login,
+      createUserDto.password,
+      createUserDto.email,
+    );
+    return createdUser;
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  async remove(@Param('id') id: string) {
+    const result = await this.usersService.deleteUserById(id);
+    return result;
   }
 }
