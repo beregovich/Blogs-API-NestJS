@@ -4,10 +4,13 @@ import { Injectable } from '@nestjs/common';
 import { addHours } from 'date-fns';
 import { IUsersRepository } from './users.service';
 import { v4 as uuidv4 } from 'uuid';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class UsersRepository implements IUsersRepository {
-  constructor(private usersModel: mongoose.Model<UserType>) {}
+  constructor(
+    @InjectModel('Users') private usersModel: mongoose.Model<UserType>,
+  ) {}
 
   async getUsers(
     page: number,
