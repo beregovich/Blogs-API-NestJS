@@ -1,10 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
-import { EntityWithPaginationType, UserType } from '../types/types';
+import { EntityWithPaginationType, UserType } from '../../types/types';
 import { addHours } from 'date-fns';
 import { Injectable } from '@nestjs/common';
-import { EmailService } from '../infrastructure/notification/email.service';
-import { AuthService } from '../features/auth/auth.service';
-import { emailTemplateService } from '../infrastructure/notification/email.manager';
+import { EmailService } from '../../infrastructure/notification/email.service';
+import { AuthService } from '../auth/auth.service';
+import { emailTemplateService } from '../../infrastructure/notification/email.manager';
 import jwt from 'jsonwebtoken';
 import { UsersRepository } from './users.repository';
 

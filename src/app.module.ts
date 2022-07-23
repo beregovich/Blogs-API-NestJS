@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { UsersController } from './users/users.controller';
+import { UsersController } from './features/users/users.controller';
 import { PostsController } from './features/posts/posts.controller';
 import { BloggersController } from './features/bloggers/api/bloggers.controller';
 import { AuthController } from './features/auth/auth.controller';
@@ -13,8 +13,8 @@ import { EmailService } from './infrastructure/notification/email.service';
 import { NotificationRepository } from './infrastructure/notification/notification.repository';
 import { PostsService } from './features/posts/posts.service';
 import { PostsRepository } from './features/posts/posts.repository';
-import { UsersService } from './users/users.service';
-import { UsersRepository } from './users/users.repository';
+import { UsersService } from './features/users/users.service';
+import { UsersRepository } from './features/users/users.repository';
 import { MongooseModule } from '@nestjs/mongoose';
 import {
   BloggersSchema,

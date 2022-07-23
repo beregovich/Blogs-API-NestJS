@@ -36,7 +36,7 @@ export class BloggersController {
   @Get(':id')
   async getBloggerById(@Param('id') id: string) {
     const blogger = await this.bloggersService.getBloggerById(id);
-    if (!blogger) throw new NotFoundException();
+    //if (!blogger) throw new NotFoundException();
     return blogger;
   }
 

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { isAfter } from 'date-fns';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { UsersRepository } from '../../users/users.repository';
+import { UsersRepository } from '../users/users.repository';
 import { EmailService } from '../../infrastructure/notification/email.service';
 import { emailTemplateService } from '../../infrastructure/notification/email.manager';
 

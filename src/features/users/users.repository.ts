@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { EntityWithPaginationType, UserType } from '../types/types';
+import { EntityWithPaginationType, UserType } from '../../types/types';
 import { Injectable } from '@nestjs/common';
 import { addHours } from 'date-fns';
 import { IUsersRepository } from './users.service';
