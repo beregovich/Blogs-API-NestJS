@@ -14,7 +14,7 @@ import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { CommentType, PostType } from '../../types/types';
-import { Pagination } from '../common/pagination.service';
+import { Pagination } from '../../infrastructure/common/pagination.service';
 import { CommentsService } from '../comments/comments.service';
 
 @Controller('posts')

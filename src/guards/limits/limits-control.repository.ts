@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { Injectable } from '@nestjs/common';
-import { LimitsControlType } from '../../../types/types';
+import { LimitsControlType } from '../../types/types';
 import { ObjectId } from 'mongodb';
 
 @Injectable()

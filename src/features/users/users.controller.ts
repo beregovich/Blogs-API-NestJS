@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { Pagination } from '../common/pagination.service';
+import { Pagination } from '../../infrastructure/common/pagination.service';
 
 @Controller('users')
 export class UsersController {

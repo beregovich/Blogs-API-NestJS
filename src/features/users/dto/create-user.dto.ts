@@ -1,4 +1,4 @@
-import { isEmail, Length, Matches } from 'class-validator';
+import { Length, Matches } from 'class-validator';
 
 export class CreateUserDto {
   @Length(3, 10)

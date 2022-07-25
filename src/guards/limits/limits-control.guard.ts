@@ -1,7 +1,7 @@
-import { UsersRepository } from '../../users/users.repository';
+import { UsersRepository } from '../../features/users/users.repository';
 import { LimitsRepository } from './limits-control.repository';
 import { ObjectId } from 'mongodb';
-import { ErrorMessageType } from '../../../types/types';
+import { ErrorMessageType } from '../../types/types';
 import {
   CanActivate,
   ExecutionContext,
