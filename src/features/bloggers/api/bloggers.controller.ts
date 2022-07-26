@@ -9,11 +9,13 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { BloggersService } from '../application/bloggers.service';
 import { Pagination } from '../../../infrastructure/common/pagination.service';
 import { CreateBloggerDto } from '../dto/create-blogger.dto';
 import { CommentsService } from '../../comments/comments.service';
+import { BaseAuthGuard } from '../../../guards/auth/base-auth.guard';
 
 @Controller('bloggers')
 export class BloggersController {
@@ -49,7 +51,7 @@ export class BloggersController {
     );
     return posts;
   }
-
+  @UseGuards(BaseAuthGuard)
   @Post()
   async createBlogger(@Body() bloggerDto: CreateBloggerDto) {
     const newBlogger = await this.bloggersService.createBlogger(
@@ -58,12 +60,12 @@ export class BloggersController {
     );
     return newBlogger;
   }
-
+  @UseGuards(BaseAuthGuard)
   @Post(':bloggerId/posts')
   async createPostByBloggerId(@Param('bloggerId') bloggerId: string) {
     return 'Coming soon';
   }
-
+  @UseGuards(BaseAuthGuard)
   @Put(':id')
   async updateBlogger(@Param('id') id: string, @Body() bloggerUpdateData) {
     const updatedBlogger = await this.bloggersService.updateBloggerById(
@@ -73,6 +75,7 @@ export class BloggersController {
     );
     return updatedBlogger; // shouldn't return any data according SWAGGER
   }
+  @UseGuards(BaseAuthGuard)
   @Delete(':id')
   async deleteBloggerById(@Param('id') id: string) {
     const result = await this.bloggersService.deleteBloggerById(id);

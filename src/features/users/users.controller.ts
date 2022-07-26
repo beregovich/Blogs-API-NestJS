@@ -7,10 +7,12 @@ import {
   Delete,
   Query,
   HttpException,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Pagination } from '../../infrastructure/common/pagination.service';
+import { BaseAuthGuard } from '../../guards/auth/base-auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -28,7 +30,7 @@ export class UsersController {
     if (!users) throw new HttpException('Not found', 404);
     return users;
   }
-
+  @UseGuards(BaseAuthGuard)
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
     const createdUser = await this.usersService.createUser(
@@ -38,7 +40,7 @@ export class UsersController {
     );
     return createdUser;
   }
-
+  @UseGuards(BaseAuthGuard)
   @Delete(':id')
   async remove(@Param('id') id: string) {
     const result = await this.usersService.deleteUserById(id);

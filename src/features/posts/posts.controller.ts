@@ -9,6 +9,7 @@ import {
   Query,
   Put,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -16,6 +17,8 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { CommentType, PostType } from '../../types/types';
 import { Pagination } from '../../infrastructure/common/pagination.service';
 import { CommentsService } from '../comments/comments.service';
+import { BaseAuthGuard } from '../../guards/auth/base-auth.guard';
+import { AuthGuard } from '../../guards/auth/auth.guard';
 
 @Controller('posts')
 export class PostsController {
@@ -50,13 +53,13 @@ export class PostsController {
     );
     return comments;
   }
-
+  @UseGuards(BaseAuthGuard)
   @Post('/')
-  async createPost(@Param() newPost: PostType) {
+  async createPost(@Body() newPost: PostType) {
     //does not find blogger for check 404
     return await this.postsService.createPost(newPost);
   }
-
+  @UseGuards(AuthGuard)
   @Post('/:postId/comments')
   async createPostByPostId(
     @Param('postId') postId: string,
@@ -64,7 +67,7 @@ export class PostsController {
   ) {
     return 'Created new comment';
   }
-
+  @UseGuards(BaseAuthGuard)
   @Put('/:postId')
   async updatePostById(
     @Param('postId') postId: string,
@@ -72,7 +75,7 @@ export class PostsController {
   ) {
     return await this.postsService.updatePostById(postId, postToUpdateData);
   }
-
+  @UseGuards(BaseAuthGuard)
   @Delete('/postId')
   async deletePostById(@Param('postId') postId: string) {
     await this.postsService.deletePostById(postId);
