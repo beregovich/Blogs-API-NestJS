@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import * as nodemailer from 'nodemailer';
 import { Injectable } from '@nestjs/common';
 import { EmailConfirmationMessageType } from '../../types/types';
 import { NotificationRepository } from './notification.repository';

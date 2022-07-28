@@ -12,7 +12,7 @@ import {
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
-import { AuthGuard } from '../../guards/auth/auth.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
 
 @Controller('comments')
 export class CommentsController {

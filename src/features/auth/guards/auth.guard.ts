@@ -6,9 +6,9 @@ import {
   UnauthorizedException,
   NotFoundException,
 } from '@nestjs/common';
-import { UserType } from '../../types/types';
+import { UserType } from '../../../types/types';
 import jwt from 'jsonwebtoken';
-import { UsersRepository } from '../../features/users/users.repository';
+import { UsersRepository } from '../../users/users.repository';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

@@ -12,7 +12,7 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Pagination } from '../../infrastructure/common/pagination.service';
-import { BaseAuthGuard } from '../../guards/auth/base-auth.guard';
+import { BaseAuthGuard } from '../auth/guards/base-auth.guard';
 
 @Controller('users')
 export class UsersController {

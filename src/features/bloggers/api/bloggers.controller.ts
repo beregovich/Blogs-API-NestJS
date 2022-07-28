@@ -15,7 +15,7 @@ import { BloggersService } from '../application/bloggers.service';
 import { Pagination } from '../../../infrastructure/common/pagination.service';
 import { CreateBloggerDto } from '../dto/create-blogger.dto';
 import { CommentsService } from '../../comments/comments.service';
-import { BaseAuthGuard } from '../../../guards/auth/base-auth.guard';
+import { BaseAuthGuard } from '../../auth/guards/base-auth.guard';
 
 @Controller('bloggers')
 export class BloggersController {

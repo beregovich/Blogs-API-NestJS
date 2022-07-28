@@ -44,7 +44,7 @@ export class UsersService {
         //sentEmails: [],
         confirmationCode: uuidv4(),
         expirationDate: addHours(new Date(), 24),
-        isConfirmed: false,
+        isConfirmed: true,
       },
     };
     const createdUser = await this.usersRepository.createUser(newUser);

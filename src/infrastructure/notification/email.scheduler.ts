@@ -1,6 +1,7 @@
 import { EmailService } from './email.service';
 import { NotificationRepository } from './notification.repository';
 import { Injectable } from '@nestjs/common';
+import { Interval } from '@nestjs/schedule';
 
 @Injectable()
 export class Scheduler {
@@ -8,32 +9,16 @@ export class Scheduler {
     private emailService: EmailService,
     private notificationRepository: NotificationRepository,
   ) {}
-  async onModuleInit() {
+  @Interval(1000)
+  async emailSenderRun() {
     const emailToSend = await this.notificationRepository.dequeueMessage();
     if (emailToSend) {
-      setTimeout(async () => {
-        await this.emailService.sendEmail(
-          emailToSend.email,
-          emailToSend.subject,
-          emailToSend.message,
-        );
-        await this.notificationRepository.updateMessageStatus(emailToSend._id);
-        await this.onModuleInit();
-      }, 1000);
+      await this.emailService.sendEmail(
+        emailToSend.email,
+        emailToSend.subject,
+        emailToSend.message,
+      );
+      await this.notificationRepository.updateMessageStatus(emailToSend._id);
     }
   }
-  // async emailSenderRun() {
-  //   const emailToSend = await this.notificationRepository.dequeueMessage();
-  //   if (emailToSend) {
-  //     setTimeout(async () => {
-  //       await this.emailService.sendEmail(
-  //         emailToSend.email,
-  //         emailToSend.subject,
-  //         emailToSend.message,
-  //       );
-  //       await this.notificationRepository.updateMessageStatus(emailToSend._id);
-  //       await this.emailSenderRun();
-  //     }, 1000);
-  //   }
-  // }
 }

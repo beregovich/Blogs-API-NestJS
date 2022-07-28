@@ -33,6 +33,7 @@ import {
 } from './features/likes/infrastructure/likes.schema';
 import { LikesService } from './features/likes/entities/application/likes.service';
 import { LikesRepository } from './features/likes/infrastructure/likes.repository';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { LikesRepository } from './features/likes/infrastructure/likes.repositor
       { name: 'CommentsLikes', schema: CommentsLikesSchema },
     ]),
     DatabaseModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [
     AppController,

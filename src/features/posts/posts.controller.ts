@@ -17,8 +17,8 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { CommentType, PostType } from '../../types/types';
 import { Pagination } from '../../infrastructure/common/pagination.service';
 import { CommentsService } from '../comments/comments.service';
-import { BaseAuthGuard } from '../../guards/auth/base-auth.guard';
-import { AuthGuard } from '../../guards/auth/auth.guard';
+import { BaseAuthGuard } from '../auth/guards/base-auth.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
 
 @Controller('posts')
 export class PostsController {
