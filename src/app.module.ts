@@ -27,6 +27,12 @@ import {
 import { AuthService } from './features/auth/auth.service';
 import { DatabaseModule } from './infrastructure/database/db.module';
 import { CommentsRepository } from './features/comments/comments.repository';
+import {
+  CommentsLikesSchema,
+  PostsLikesSchema,
+} from './features/likes/infrastructure/likes.schema';
+import { LikesService } from './features/likes/entities/application/likes.service';
+import { LikesRepository } from './features/likes/infrastructure/likes.repository';
 
 @Module({
   imports: [
@@ -35,8 +41,10 @@ import { CommentsRepository } from './features/comments/comments.repository';
       { name: 'Posts', schema: PostsSchema },
       { name: 'Users', schema: usersSchema },
       { name: 'Comments', schema: commentsSchema },
-      //{ name: 'Limits', schema: limitsSchema },
+      { name: 'Limits', schema: limitsSchema },
       { name: 'EmailsQueue', schema: emailsQueueSchema },
+      { name: 'PostsLikes', schema: PostsLikesSchema },
+      { name: 'CommentsLikes', schema: CommentsLikesSchema },
     ]),
     DatabaseModule,
   ],
@@ -63,6 +71,8 @@ import { CommentsRepository } from './features/comments/comments.repository';
     UsersService,
     UsersRepository,
     AuthService,
+    LikesService,
+    LikesRepository,
   ],
 })
 export class AppModule {}

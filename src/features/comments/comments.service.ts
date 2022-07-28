@@ -8,10 +8,14 @@ import {
   QueryDataType,
 } from '../../types/types';
 import { CommentsRepository } from './comments.repository';
+import { LikesService } from '../likes/entities/application/likes.service';
 
 @Injectable()
 export class CommentsService {
-  constructor(private commentsRepository: CommentsRepository) {}
+  constructor(
+    private commentsRepository: CommentsRepository,
+    private readonly likesService: LikesService,
+  ) {}
 
   async getCommentsByPostId(
     paginationData: QueryDataType,
@@ -21,6 +25,7 @@ export class CommentsService {
       paginationData,
       PostId,
     );
+    const likesData = await this.likesService;
     return comments;
   }
 

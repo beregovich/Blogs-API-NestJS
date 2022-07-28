@@ -19,7 +19,6 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new HttpExceptionFilter());
-  //runDb();
   await app.listen(5000);
 }
 bootstrap();

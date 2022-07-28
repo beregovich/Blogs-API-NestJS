@@ -88,3 +88,9 @@ export type EmailConfirmationMessageType = {
   isSent: boolean;
   createdAt: Date;
 };
+
+export enum LikeAction {
+  Like = 'Like',
+  Dislike = 'Dislike',
+  None = 'None',
+}
