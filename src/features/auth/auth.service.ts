@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { isAfter } from 'date-fns';
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcrypt';
 import { UsersRepository } from '../users/users.repository';
 import { EmailService } from '../../infrastructure/notification/email.service';
@@ -19,8 +19,8 @@ export class AuthService {
       userId,
       date: new Date(),
     };
-    const accessToken = jwt.sign(payload, secretKey, { expiresIn: '10s' });
-    const refreshToken = jwt.sign(payload, secretKey, { expiresIn: '20s' });
+    const accessToken = jwt.sign(payload, secretKey, { expiresIn: '1d' });
+    const refreshToken = jwt.sign(payload, secretKey, { expiresIn: '30d' });
     return {
       accessToken,
       refreshToken,

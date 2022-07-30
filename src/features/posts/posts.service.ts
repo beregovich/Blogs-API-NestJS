@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { EntityWithPaginationType, PostType } from '../../types/types';
-import { PostsRepository } from './posts.repository';
+import { PostsRepository } from './infrastructure/posts.repository';
 
 @Injectable()
 export class PostsService {
@@ -25,7 +25,8 @@ export class PostsService {
   }
 
   async getPostById(id: string): Promise<PostType | false> {
-    const post = this.postsRepository.getPostById(id);
+    //const post = this.postsRepository.getPostById(id);
+    const post = this.postsRepository.getPostWithLikesById(id);
     if (post) {
       return post;
     } else return false;

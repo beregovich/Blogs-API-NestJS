@@ -1,44 +1,94 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  Response,
+  NotFoundException,
+  UnauthorizedException,
+  BadRequestException,
+  Res,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { RegistrationDto } from './dto/registration.dto';
+import { LocalAuthGuard } from './guards/local-auth.guard';
+import { UsersService } from '../users/users.service';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly usersService: UsersService,
+  ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Get('me')
   async getUserData() {
     return null;
   }
 
+  @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Body() createAuthDto: CreateAuthDto) {
-    return null;
+  async login(@Request() req, @Res({ passthrough: true }) res) {
+    const userData = req.user.data;
+    res.cookie('refreshToken', userData.refreshToken, {
+      httpOnly: true,
+      secure: true,
+    });
+    return { accessToken: req.user.data.accessToken };
   }
 
   @Post('registration')
-  registration(@Body() createAuthDto: CreateAuthDto) {
-    return null;
+  async registration(@Body() registrationData: RegistrationDto) {
+    const user = await this.usersService.createUser(
+      registrationData.login,
+      registrationData.password,
+      registrationData.email,
+    );
+    return;
   }
 
   @Post('registration-confirmation')
-  confirmRegistration(@Body() createAuthDto: CreateAuthDto) {
+  async confirmRegistration(@Body('code') confirmationCode) {
+    const result = await this.authService.confirmEmail(confirmationCode);
+    if (!result) {
+      throw new NotFoundException();
+    }
     return null;
   }
 
   @Post('registration-email-resending')
-  resendRegistrationEmail(@Body() createAuthDto: CreateAuthDto) {
+  async resendRegistrationEmail(@Body('email') email: string) {
+    const isResented = await this.authService.resendCode(email);
+    if (!isResented)
+      throw new BadRequestException({
+        message: 'email already confirmed or such email not found',
+        field: 'email',
+      });
     return null;
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('logout')
-  logout(@Body() createAuthDto: CreateAuthDto) {
+  async logout(@Request() req) {
+    if (!req.cookie?.refreshToken) throw new UnauthorizedException();
+    await this.usersService.addRevokedToken(req.cookie.refreshToken);
     return null;
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('refresh-token')
-  refreshToken(@Body() createAuthDto: CreateAuthDto) {
-    return null;
+  async refreshToken(@Request() req, @Response() res) {
+    if (!req.cookie?.refreshToken) throw new UnauthorizedException();
+    const userId = req.user.id;
+    const newTokens = this.authService.createJwtTokensPair(userId);
+    res.cookie('refreshToken', newTokens.refreshToken, {
+      httpOnly: true,
+      secure: true,
+    });
+    return { accessToken: newTokens.accessToken };
   }
 }

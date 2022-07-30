@@ -5,15 +5,18 @@ import { LikeAction } from '../../../types/types';
 export type PostsLikesDocument = PostsLikes & Document;
 export type CommentsLikesDocument = CommentsLikes & Document;
 
-@Schema()
+@Schema({ collection: 'PostsLikes' })
 export class PostsLikes {
   @Prop()
   userId: string;
 
   @Prop()
-  postId: number;
+  login: string;
 
   @Prop()
+  postId: string;
+
+  @Prop({ default: 'None' })
   action: LikeAction;
 
   @Prop()
@@ -28,7 +31,7 @@ export class CommentsLikes {
   @Prop()
   commentId: number;
 
-  @Prop()
+  @Prop({ default: 'None' })
   action: LikeAction;
 
   @Prop()

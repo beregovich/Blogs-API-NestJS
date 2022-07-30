@@ -3,10 +3,14 @@ import { BloggerType, EntityWithPaginationType } from '../../../types/types';
 import { Injectable } from '@nestjs/common';
 import { IBloggersRepository } from '../application/bloggers.service';
 import { InjectModel } from '@nestjs/mongoose';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
-export class BloggersRepository implements IBloggersRepository {
+export class BloggersSqlRepository implements IBloggersRepository {
   constructor(
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
     @InjectModel('Bloggers') private bloggersModel,
     @InjectModel('Posts') private postsModel,
   ) {}

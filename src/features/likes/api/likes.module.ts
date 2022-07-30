@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { LikesService } from '../entities/application/likes.service';
+import { LikesService } from '../application/likes.service';
 import { LikesRepository } from '../infrastructure/likes.repository';
 
 @Module({

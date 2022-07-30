@@ -12,7 +12,7 @@ import { Scheduler } from './infrastructure/notification/email.scheduler';
 import { EmailService } from './infrastructure/notification/email.service';
 import { NotificationRepository } from './infrastructure/notification/notification.repository';
 import { PostsService } from './features/posts/posts.service';
-import { PostsRepository } from './features/posts/posts.repository';
+import { PostsRepository } from './features/posts/infrastructure/posts.repository';
 import { UsersService } from './features/users/users.service';
 import { UsersRepository } from './features/users/users.repository';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -31,9 +31,13 @@ import {
   CommentsLikesSchema,
   PostsLikesSchema,
 } from './features/likes/infrastructure/likes.schema';
-import { LikesService } from './features/likes/entities/application/likes.service';
+import { LikesService } from './features/likes/application/likes.service';
 import { LikesRepository } from './features/likes/infrastructure/likes.repository';
 import { ScheduleModule } from '@nestjs/schedule';
+import { LocalStrategy } from './features/auth/strategies/local.strategy';
+import { JwtStrategy } from './features/auth/strategies/jwt.strategy';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Blogger } from './features/bloggers/entities/blogger.entity';
 
 @Module({
   imports: [
@@ -49,6 +53,17 @@ import { ScheduleModule } from '@nestjs/schedule';
     ]),
     DatabaseModule,
     ScheduleModule.forRoot(),
+    TypeOrmModule.forRoot({
+      type: 'mysql',
+      host: 'localhost',
+      port: 5432,
+      username: /*process.env.POSTGRE_SQL_USERNAME ||*/ 'postgres',
+      password: /*process.env.POSTGRE_SQL_PASSWORD ||*/ 'root1357',
+      database: 'bloggersApi',
+      autoLoadEntities: false,
+      synchronize: true,
+    }),
+    TypeOrmModule.forFeature([Blogger]),
   ],
   controllers: [
     AppController,
@@ -75,6 +90,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     AuthService,
     LikesService,
     LikesRepository,
+    LocalStrategy,
+    JwtStrategy,
   ],
 })
 export class AppModule {}

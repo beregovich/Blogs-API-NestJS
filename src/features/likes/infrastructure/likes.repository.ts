@@ -12,19 +12,32 @@ export class LikesRepository {
     private readonly postsLikes: Model<PostsLikesDocument>,
     @InjectModel('CommentsLikes')
     private readonly commentsLikes: Model<CommentsLikesDocument>,
+    @InjectModel('Posts') private readonly postsModel,
   ) {}
 
   async updatePostLike(action: LikeAction, userId: string, postId: string) {
     if (action == LikeAction.None) {
-      await this.postsLikes.deleteOne({ userId, postId });
+      await this.postsLikes.updateOne({ userId, postId });
     } else {
-      await this.postsLikes.updateOne(
+      const result = await this.postsLikes.updateOne(
         { userId, postId },
-        { $set: { action, lastActionAt: new Date() } },
+        {
+          $set: {
+            action: action,
+            userId: userId,
+            postId: postId,
+            lastActionAt: new Date(),
+          },
+        },
         { upsert: true },
       );
+      await this.postsModel.updateOne(
+        { id: postId },
+        { $push: { PostsLikes: result.upsertedId } },
+      );
+      return result;
     }
-    return null;
+    return;
   }
 
   async updateCommentLike(

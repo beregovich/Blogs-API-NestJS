@@ -3,28 +3,28 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Query,
   Put,
-  ParseIntPipe,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
-import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
-import { CommentType, PostType } from '../../types/types';
+import { CommentType, LikeAction, PostType } from '../../types/types';
 import { Pagination } from '../../infrastructure/common/pagination.service';
 import { CommentsService } from '../comments/comments.service';
 import { BaseAuthGuard } from '../auth/guards/base-auth.guard';
 import { AuthGuard } from '../auth/guards/auth.guard';
+import { LikesService } from '../likes/application/likes.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('posts')
 export class PostsController {
   constructor(
     private readonly postsService: PostsService,
     private readonly commentsService: CommentsService,
+    private readonly likesService: LikesService,
   ) {}
 
   @Get('/')
@@ -74,6 +74,19 @@ export class PostsController {
     @Body() postToUpdateData: PostType,
   ) {
     return await this.postsService.updatePostById(postId, postToUpdateData);
+  }
+  @UseGuards(JwtAuthGuard)
+  @Put('/:postId/like-status')
+  async updatePostLike(
+    @Param('postId') postId: string,
+    @Body('likeStatus') likeStatus: string,
+    @Request() req,
+  ) {
+    return await this.likesService.updatePostLike(
+      LikeAction[likeStatus],
+      req.user.userId,
+      postId,
+    );
   }
   @UseGuards(BaseAuthGuard)
   @Delete('/postId')

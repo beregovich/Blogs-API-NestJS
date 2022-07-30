@@ -8,7 +8,7 @@ import {
   QueryDataType,
 } from '../../types/types';
 import { CommentsRepository } from './comments.repository';
-import { LikesService } from '../likes/entities/application/likes.service';
+import { LikesService } from '../likes/application/likes.service';
 
 @Injectable()
 export class CommentsService {

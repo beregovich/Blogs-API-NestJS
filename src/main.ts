@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { runDb } from './infrastructure/database/db';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './exception.filter';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,6 +20,7 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.use(cookieParser());
   await app.listen(5000);
 }
 bootstrap();

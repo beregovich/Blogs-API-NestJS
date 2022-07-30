@@ -35,12 +35,12 @@ export class BloggersService {
     name: string,
     youtubeUrl: string,
   ): Promise<BloggerType | boolean> {
-    const bloggerResult = this.bloggersRepository.updateBloggerById(
+    const isUpdated = this.bloggersRepository.updateBloggerById(
       id,
       name,
       youtubeUrl,
     );
-    return bloggerResult;
+    return isUpdated;
   }
 
   async deleteBloggerById(id: string): Promise<boolean> {

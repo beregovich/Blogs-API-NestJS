@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import mongoose from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import {
   BloggerType,
   CommentType,
@@ -21,13 +21,14 @@ export const BloggersSchema = new mongoose.Schema<BloggerType>({
   youtubeUrl: String,
 });
 
-export const PostsSchema = new mongoose.Schema<PostType>({
+export const PostsSchema = new mongoose.Schema<any>({
   id: String,
   title: String,
   shortDescription: String,
   content: String,
   bloggerId: String,
   bloggerName: String,
+  PostsLikes: [{ type: Schema.Types.ObjectId, ref: 'PostsLikes' }],
 });
 
 const userAccountDataSchema = new mongoose.Schema<UserAccountType>({
