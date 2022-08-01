@@ -38,6 +38,8 @@ import { LocalStrategy } from './features/auth/strategies/local.strategy';
 import { JwtStrategy } from './features/auth/strategies/jwt.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Blogger } from './features/bloggers/entities/blogger.entity';
+import { BloggersSqlRepository } from './features/bloggers/infrastructure/bloggers-sql.repository';
+import { typeOrmLocalPostgres } from './config';
 
 @Module({
   imports: [
@@ -54,14 +56,16 @@ import { Blogger } from './features/bloggers/entities/blogger.entity';
     DatabaseModule,
     ScheduleModule.forRoot(),
     TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
+      type: 'postgres',
+      host: 'ec2-52-48-159-67.eu-west-1.compute.amazonaws.com',
       port: 5432,
-      username: /*process.env.POSTGRE_SQL_USERNAME ||*/ 'postgres',
-      password: /*process.env.POSTGRE_SQL_PASSWORD ||*/ 'root1357',
-      database: 'bloggersApi',
-      autoLoadEntities: false,
-      synchronize: true,
+      username: 'ygjclrasnmemnm',
+      password:
+        '8829d3f8b4b65b473e3f0cf425ea5ef17d6f0b7a7dcda2cd84542d48520bfa9d',
+      database: 'dd99jeg9lg1amo',
+      autoLoadEntities: true,
+      synchronize: false,
+      ssl: { rejectUnauthorized: false },
     }),
     TypeOrmModule.forFeature([Blogger]),
   ],
@@ -78,6 +82,7 @@ import { Blogger } from './features/bloggers/entities/blogger.entity';
   providers: [
     BloggersService,
     BloggersRepository,
+    BloggersSqlRepository,
     CommentsService,
     CommentsRepository,
     Scheduler,

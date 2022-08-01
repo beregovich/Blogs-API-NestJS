@@ -2,10 +2,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { BadRequestException, Injectable, Scope } from '@nestjs/common';
 import { BloggerType, EntityWithPaginationType } from '../../../types/types';
 import { BloggersRepository } from '../infrastructure/bloggers.repository';
+import { BloggersSqlRepository } from '../infrastructure/bloggers-sql.repository';
 
 @Injectable({ scope: Scope.TRANSIENT })
 export class BloggersService {
-  constructor(private bloggersRepository: BloggersRepository) {}
+  //constructor(private bloggersRepository: BloggersRepository) {}
+  constructor(private bloggersRepository: BloggersSqlRepository) {}
 
   async getBloggers(page: number, pageSize: number, searchNameTerm: string) {
     return this.bloggersRepository.getBloggers(page, pageSize, searchNameTerm);

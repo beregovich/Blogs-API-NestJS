@@ -71,7 +71,7 @@ export class BloggersController {
     const updatedBlogger = await this.bloggersService.updateBloggerById(
       id,
       bloggerUpdateData.name,
-      bloggerUpdateData.youtubeurl,
+      bloggerUpdateData.youtubeUrl,
     );
     return updatedBlogger; // shouldn't return any data according SWAGGER
   }

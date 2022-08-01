@@ -1,6 +1,10 @@
 import { BloggerType, EntityWithPaginationType } from '../../../types/types';
 
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { IBloggersRepository } from '../application/bloggers.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { InjectDataSource } from '@nestjs/typeorm';
@@ -21,63 +25,102 @@ export class BloggersSqlRepository implements IBloggersRepository {
     searchNameTerm: string,
   ): Promise<EntityWithPaginationType<BloggerType[]>> {
     const filter = { name: { $regex: searchNameTerm ? searchNameTerm : '' } };
-    const bloggers = await this.bloggersModel
-      .find(filter, { _id: 0, __v: 0 })
-      .skip((page - 1) * pageSize)
-      .limit(pageSize)
-      .lean();
-    const totalCount = await this.bloggersModel.countDocuments(filter);
-    const pagesCount = Math.ceil(totalCount / pageSize);
+    const searchTerm = searchNameTerm ? searchNameTerm : '';
+    const blogger = await this.dataSource.query(
+      `
+    SELECT to_jsonb("Bloggers") FROM "Bloggers"
+    WHERE "name" like $3
+    ORDER BY "name" DESC
+    OFFSET $1 ROWS FETCH NEXT $2 ROWS ONLY
+    `,
+      [(page - 1) * pageSize, pageSize, `%${searchTerm}%`],
+    );
+    const totalCount = await this.dataSource.query(
+      `SELECT COUNT(name) FROM public."Bloggers"
+              WHERE "name" like $1`,
+      [`%${searchTerm}%`],
+    );
+    const items: BloggerType[] = [];
+    blogger.forEach((b) => items.push(b.to_jsonb));
+    const pagesCount = Math.ceil(totalCount[0].count / pageSize);
     return {
       pagesCount,
       page,
       pageSize,
-      totalCount,
-      items: bloggers,
+      totalCount: totalCount[0].count,
+      items,
     };
   }
 
   async getBloggerById(bloggerId: string): Promise<BloggerType | null> {
-    const blogger = await this.bloggersModel
-      .findOne({ id: bloggerId }, { _id: 0, __v: 0 })
-      .lean();
+    const blogger = await this.dataSource.query(
+      `
+      SELECT to_jsonb("Bloggers") FROM "Bloggers"
+      WHERE id = $1
+      `,
+      [bloggerId],
+    );
     if (blogger) {
-      return blogger;
+      return blogger[0].to_jsonb;
     } else return null;
   }
 
   async createBlogger(newBlogger: BloggerType) {
-    await this.bloggersModel.create(newBlogger);
-    return {
-      id: newBlogger.id,
-      name: newBlogger.name,
-      youtubeUrl: newBlogger.youtubeUrl,
-    };
+    try {
+      const result = await this.dataSource.query(
+        `
+    INSERT INTO "Bloggers" ("id", "name", "youtubeUrl")
+    VALUES ($1, $2, $3)
+    RETURNING ("id", "name", "youtubeUrl");
+    `,
+        [newBlogger.id, newBlogger.name, newBlogger.youtubeUrl],
+      );
+      const blogger = await this.dataSource.query(
+        `
+      SELECT to_jsonb("Bloggers") FROM "Bloggers"
+      WHERE id = $1
+      `,
+        [newBlogger.id],
+      );
+      return blogger[0].to_jsonb;
+    } catch (e) {
+      throw new NotFoundException({ error: e });
+    }
   }
 
   async updateBloggerById(id: string, name: string, youtubeUrl: string) {
-    const result = await this.bloggersModel.updateOne(
-      { id },
-      {
-        $set: {
-          name: name,
-          youtubeUrl: youtubeUrl,
-        },
-      },
+    const result = await this.dataSource.query(
+      `
+    UPDATE "Bloggers"
+    SET "name"=$1, "youtubeUrl"=$2
+    WHERE id = $3
+    `,
+      [name, youtubeUrl, id],
     );
-    await this.postsModel.updateMany(
-      { bloggerId: id },
-      {
-        $set: {
-          bloggerName: name,
-        },
-      },
-    );
-    return result.modifiedCount === 1;
+    // await this.postsModel.updateMany(
+    //   { bloggerId: id },
+    //   {
+    //     $set: {
+    //       bloggerName: name,
+    //     },
+    //   },
+    // );
+    console.log(result);
+    if (result[1] === 0)
+      throw new NotFoundException({ field: 'id', message: 'not found' });
+    return null;
   }
 
   async deleteBloggerById(id: string): Promise<boolean> {
-    const result = await this.bloggersModel.deleteOne({ id });
-    return result.deletedCount === 1;
+    const result = await this.dataSource.query(
+      `
+    DELETE FROM "Bloggers"
+    WHERE id = $1
+    `,
+      [id],
+    );
+    if (result[1] === 0)
+      throw new NotFoundException({ field: 'id', message: 'not found' });
+    return null;
   }
 }
