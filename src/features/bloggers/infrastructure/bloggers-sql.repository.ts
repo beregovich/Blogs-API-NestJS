@@ -24,7 +24,6 @@ export class BloggersSqlRepository implements IBloggersRepository {
     pageSize: number,
     searchNameTerm: string,
   ): Promise<EntityWithPaginationType<BloggerType[]>> {
-    const filter = { name: { $regex: searchNameTerm ? searchNameTerm : '' } };
     const searchTerm = searchNameTerm ? searchNameTerm : '';
     const blogger = await this.dataSource.query(
       `
@@ -105,7 +104,6 @@ export class BloggersSqlRepository implements IBloggersRepository {
     //     },
     //   },
     // );
-    console.log(result);
     if (result[1] === 0)
       throw new NotFoundException({ field: 'id', message: 'not found' });
     return null;
