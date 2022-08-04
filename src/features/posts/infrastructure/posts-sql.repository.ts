@@ -83,32 +83,28 @@ export class PostsSqlRepository implements IPostsRepository {
   }
 
   async createPost(newPost: PostType): Promise<PostType | null> {
-    try {
-      await this.dataSource.query(
-        `
-    INSERT INTO "POSTS" ("id", "title", "shortDescription", "content", "bloggerId")
+    await this.dataSource.query(
+      `
+    INSERT INTO "Posts" ("id", "title", "shortDescription", "content", "bloggerId")
     VALUES ($1, $2, $3, $4, $5)
     RETURNING ("id", "title", "shortDescription", "content", "bloggerId");
     `,
-        [
-          newPost.id,
-          newPost.title,
-          newPost.shortDescription,
-          newPost.content,
-          newPost.bloggerId,
-        ],
-      );
-      const blogger = await this.dataSource.query(
-        `
+      [
+        newPost.id,
+        newPost.title,
+        newPost.shortDescription,
+        newPost.content,
+        newPost.bloggerId,
+      ],
+    );
+    const blogger = await this.dataSource.query(
+      `
       SELECT to_jsonb("Posts") FROM "Posts"
       WHERE id = $1
       `,
-        [newPost.id],
-      );
-      return blogger[0].to_jsonb;
-    } catch (e) {
-      throw new NotFoundException({ error: e });
-    }
+      [newPost.id],
+    );
+    return blogger[0].to_jsonb;
   }
 
   async updatePostById(id: string, newPost: PostType) {

@@ -1,10 +1,11 @@
-import { BloggerType, PostType } from '../../../types/types';
+import { BloggerType, LikeAction, PostType } from '../../../types/types';
 import mongoose from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { IPostsRepository } from '../posts.service';
 import { BloggersRepository } from '../../bloggers/infrastructure/bloggers.repository';
 import { InjectModel } from '@nestjs/mongoose';
 import { BloggersService } from '../../bloggers/application/bloggers.service';
+import { UsersService } from '../../users/users.service';
 
 @Injectable()
 export class PostsRepository implements IPostsRepository {
@@ -12,6 +13,7 @@ export class PostsRepository implements IPostsRepository {
     @InjectModel('Posts') private postsModel,
     @InjectModel('Bloggers') private bloggersModel,
     @InjectModel('PostsLikes') private postsLikesModel,
+    private readonly usersService: UsersService,
     private readonly bloggersService: BloggersService,
   ) {}
 
@@ -61,33 +63,54 @@ export class PostsRepository implements IPostsRepository {
   }
 
   async getPostWithLikesById(id: string) {
-    const post = await this.postsModel.findOne({ id }, { _id: 0, __v: 0 });
-    const likes = await this.postsLikesModel
-      .find({ postId: id }, '-_id -__v')
-      .sort({ lastActionAt: -1 });
-    const currentUserLikeStatus = likes.find((l) => l.postId === id);
-    // .populate({
-    //   path: 'PostsLikes',
-    //   match: { postId: id },
-    //   select: 'userId login action lastActionAt postId',
-    // });
-    // .aggregate([
-    //   //{ $match: { id } },
+    // const post = await this.postsModel.aggregate([
+    //   { $match: { id } },
+    //   { $project: { _id: 0, __v: 0 } },
+    //
+    //   // {
+    //   //   $group: {
+    //   //     _id: '$extendedLikesInfo.action',
+    //   //     likesCount: { $count: {} },
+    //   //   },
+    //   // },
+    //
     //   {
-    //     $lookup: {
-    //       from: 'PostsLikes',
-    //       localField: 'id',
-    //       foreignField: 'postId',
-    //       as: 'likes',
+    //     $addFields: {
+    //       likesCount: {
+    //         $size: {
+    //           filter: {
+    //             input: { $ifNull: ['$extendedLikesInfo', []] },
+    //             cond: { $eq: ['$this.action', 'Like'] },
+    //           },
+    //         },
+    //       },
+    //       //       // $filter: {
+    //       //       //   input: '$extendedLikesInfo',
+    //       //       //   as: 's',
+    //       //       //   cond: { $eq: ['$$s.action', 'Dislike'] },
+    //       //       // },
     //     },
     //   },
-    //{ $group: { _id: '$action', count: { $count: {} } } },
-    // ])
-    // .exec();
+    // ]);
+
+    //
+    const post = await this.postsModel
+      .findOne(
+        { id },
+        {
+          _id: 0,
+          __v: 0,
+          'extendedLikesInfo._id': 0,
+        },
+      )
+      .lean();
+    const likes = post.extendedLikesInfo.sort((a, b) => b - a);
+    const currentUserLikeStatus = likes.find((l) => l.postId === id);
     if (!post) return false;
     const blogger = await this.bloggersService.getBloggerById(post.bloggerId);
-    //if (!blogger) return false;
+    if (!blogger) return false;
     const bloggerName = blogger?.name;
+    const likesCount = likes.filter((l) => l.action === 'Like').length;
     return {
       id: post.id,
       title: post.title,
@@ -96,7 +119,7 @@ export class PostsRepository implements IPostsRepository {
       bloggerId: post.bloggerId,
       bloggerName,
       extendedLikesInfo: {
-        likesCount: likes.filter((l) => l.action === 'Like').length,
+        likesCount: likesCount,
         dislikesCount: likes.filter((l) => l.action === 'Dislike').length,
         myStatus: currentUserLikeStatus ? currentUserLikeStatus.action : 'None',
         newestLikes: likes.slice(0, 3),
@@ -136,5 +159,38 @@ export class PostsRepository implements IPostsRepository {
   async deletePostById(id: string) {
     const result = await this.postsModel.deleteOne({ id });
     return result.deletedCount === 1;
+  }
+
+  async updatePostLike(
+    action: LikeAction,
+    userId: string,
+    postId: string,
+    addedAt: Date,
+  ) {
+    if (action == LikeAction.None) {
+      await this.postsModel.updateOne(
+        {
+          postId,
+        },
+        { $pull: { extendedLikesInfo: { userId } } },
+      );
+    } else {
+      const user = await this.usersService.getUserById(userId);
+      const result = await this.postsModel.updateOne(
+        { postId },
+        {
+          $push: {
+            extendedLikesInfo: {
+              action: action,
+              userId: userId,
+              login: user.accountData.login,
+              addedAt,
+            },
+          },
+        },
+      );
+      return result;
+    }
+    return;
   }
 }

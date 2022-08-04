@@ -40,6 +40,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Blogger } from './features/bloggers/entities/blogger.entity';
 import { BloggersSqlRepository } from './features/bloggers/infrastructure/bloggers-sql.repository';
 import { typeOrmLocalPostgres } from './config';
+import { PostsSqlRepository } from './features/posts/infrastructure/posts-sql.repository';
+
+const dbUsername = process.env.POSTGRES_HEROKU_USERNAME;
+const dbPassword = process.env.POSTGRES_HEROKU_PASSWORD;
 
 @Module({
   imports: [
@@ -59,9 +63,8 @@ import { typeOrmLocalPostgres } from './config';
       type: 'postgres',
       host: 'ec2-52-48-159-67.eu-west-1.compute.amazonaws.com',
       port: 5432,
-      username: 'ygjclrasnmemnm',
-      password:
-        '8829d3f8b4b65b473e3f0cf425ea5ef17d6f0b7a7dcda2cd84542d48520bfa9d',
+      username: dbUsername,
+      password: dbPassword,
       database: 'dd99jeg9lg1amo',
       autoLoadEntities: true,
       synchronize: false,
@@ -90,6 +93,7 @@ import { typeOrmLocalPostgres } from './config';
     NotificationRepository,
     PostsService,
     PostsRepository,
+    PostsSqlRepository,
     UsersService,
     UsersRepository,
     AuthService,

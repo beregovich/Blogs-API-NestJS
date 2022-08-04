@@ -5,12 +5,14 @@ import {
   CommentType,
   EmailConfirmationMessageType,
   EmailConfirmationType,
+  LikeAction,
   LimitsControlType,
   PostType,
   SentConfirmationEmailType,
   UserAccountType,
   UserType,
 } from '../../types/types';
+import { Prop } from '@nestjs/mongoose';
 
 const mongoUri = process.env.mongoURI || '';
 
@@ -21,6 +23,13 @@ export const BloggersSchema = new mongoose.Schema<BloggerType>({
   youtubeUrl: String,
 });
 
+const PostsLikesSchema = new mongoose.Schema<any>({
+  userId: String,
+  login: String,
+  action: String,
+  addedAt: Date,
+});
+
 export const PostsSchema = new mongoose.Schema<any>({
   id: String,
   title: String,
@@ -28,7 +37,7 @@ export const PostsSchema = new mongoose.Schema<any>({
   content: String,
   bloggerId: String,
   bloggerName: String,
-  PostsLikes: [{ type: Schema.Types.ObjectId, ref: 'PostsLikes' }],
+  extendedLikesInfo: [PostsLikesSchema],
 });
 
 const userAccountDataSchema = new mongoose.Schema<UserAccountType>({

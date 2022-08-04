@@ -122,4 +122,9 @@ export class UsersRepository implements IUsersRepository {
     });
     return result;
   }
+
+  async getUserById(id: string) {
+    const user = await this.usersModel.findOne({ 'accountData.id': id });
+    return user;
+  }
 }

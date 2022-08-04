@@ -82,14 +82,14 @@ export class PostsController {
     @Body('likeStatus') likeStatus: string,
     @Request() req,
   ) {
-    return await this.likesService.updatePostLike(
+    return await this.postsService.updatePostLike(
       LikeAction[likeStatus],
       req.user.userId,
       postId,
     );
   }
   @UseGuards(BaseAuthGuard)
-  @Delete('/postId')
+  @Delete('/:postId')
   async deletePostById(@Param('postId') postId: string) {
     await this.postsService.deletePostById(postId);
   }

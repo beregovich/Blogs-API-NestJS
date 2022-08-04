@@ -25,6 +25,11 @@ export class UsersService {
     return users;
   }
 
+  async getUserById(id: string) {
+    const user = await this.usersRepository.getUserById(id);
+    return user;
+  }
+
   async createUser(
     login: string,
     password: string,

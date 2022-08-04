@@ -5,12 +5,13 @@ import { LikeAction } from '../../../types/types';
 @Injectable()
 export class LikesService {
   constructor(private readonly likesRepository: LikesRepository) {}
-
   async updatePostLike(action: LikeAction, userId: string, postId: string) {
+    const currentDate = new Date();
     const result = await this.likesRepository.updatePostLike(
       action,
       userId,
       postId,
+      currentDate,
     );
     return result;
   }

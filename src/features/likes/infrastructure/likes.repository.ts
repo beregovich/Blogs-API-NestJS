@@ -15,9 +15,14 @@ export class LikesRepository {
     @InjectModel('Posts') private readonly postsModel,
   ) {}
 
-  async updatePostLike(action: LikeAction, userId: string, postId: string) {
+  async updatePostLike(
+    action: LikeAction,
+    userId: string,
+    postId: string,
+    lastActionAt: Date,
+  ) {
     if (action == LikeAction.None) {
-      await this.postsLikes.updateOne({ userId, postId });
+      await this.postsLikes.deleteOne({ userId, postId });
     } else {
       const result = await this.postsLikes.updateOne(
         { userId, postId },
@@ -26,7 +31,7 @@ export class LikesRepository {
             action: action,
             userId: userId,
             postId: postId,
-            lastActionAt: new Date(),
+            lastActionAt,
           },
         },
         { upsert: true },

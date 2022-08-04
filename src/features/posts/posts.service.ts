@@ -2,8 +2,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { EntityWithPaginationType, PostType } from '../../types/types';
+import {
+  EntityWithPaginationType,
+  LikeAction,
+  PostType,
+} from '../../types/types';
 import { PostsRepository } from './infrastructure/posts.repository';
+import { PostsSqlRepository } from './infrastructure/posts-sql.repository';
 
 @Injectable()
 export class PostsService {
@@ -46,6 +51,17 @@ export class PostsService {
 
   async deletePostById(id: string): Promise<boolean> {
     return this.postsRepository.deletePostById(id);
+  }
+
+  async updatePostLike(action: LikeAction, userId: string, postId: string) {
+    const currentDate = new Date();
+    const result = await this.postsRepository.updatePostLike(
+      action,
+      userId,
+      postId,
+      currentDate,
+    );
+    return result;
   }
 }
 

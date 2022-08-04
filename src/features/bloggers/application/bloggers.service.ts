@@ -7,7 +7,7 @@ import { BloggersSqlRepository } from '../infrastructure/bloggers-sql.repository
 @Injectable({ scope: Scope.TRANSIENT })
 export class BloggersService {
   //constructor(private bloggersRepository: BloggersRepository) {}
-  constructor(private bloggersRepository: BloggersSqlRepository) {}
+  constructor(private bloggersRepository: BloggersRepository) {}
 
   async getBloggers(page: number, pageSize: number, searchNameTerm: string) {
     return this.bloggersRepository.getBloggers(page, pageSize, searchNameTerm);
