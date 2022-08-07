@@ -23,7 +23,7 @@ export const BloggersSchema = new mongoose.Schema<BloggerType>({
   youtubeUrl: String,
 });
 
-const PostsLikesSchema = new mongoose.Schema<any>({
+const LikesSchema = new mongoose.Schema<any>({
   userId: String,
   login: String,
   action: String,
@@ -37,7 +37,7 @@ export const PostsSchema = new mongoose.Schema<any>({
   content: String,
   bloggerId: String,
   bloggerName: String,
-  extendedLikesInfo: [PostsLikesSchema],
+  extendedLikesInfo: [LikesSchema],
 });
 
 const userAccountDataSchema = new mongoose.Schema<UserAccountType>({
@@ -71,6 +71,7 @@ export const commentsSchema = new mongoose.Schema<CommentType>({
   userId: String,
   userLogin: String,
   addedAt: Date,
+  likesInfo: [LikesSchema],
 });
 
 export const limitsSchema = new mongoose.Schema<LimitsControlType>({

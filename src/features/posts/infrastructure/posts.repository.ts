@@ -22,6 +22,7 @@ export class PostsRepository implements IPostsRepository {
     pageSize: number,
     searchNameTerm: string,
     bloggerId: string | null,
+    userId: string | null,
   ) {
     const filter = bloggerId
       ? { title: { $regex: searchNameTerm ? searchNameTerm : '' }, bloggerId }
@@ -29,20 +30,49 @@ export class PostsRepository implements IPostsRepository {
     const totalCount = await this.postsModel.countDocuments(filter);
     const pagesCount = Math.ceil(totalCount / pageSize);
     const allPosts = await this.postsModel
-      .find(filter, { _id: 0, __v: 0, PostsLikes: 0 })
+      .find(filter, {
+        _id: 0,
+        __v: 0,
+        PostsLikes: 0,
+        'extendedLikesInfo._id': 0,
+      })
       .skip((page - 1) * pageSize)
       .limit(pageSize)
       .lean();
-    const postsIds = allPosts.map((el) => el.id);
-    const likesForCurrentPosts = await this.postsLikesModel.find({
-      postId: { $in: postsIds },
+    const formattedPosts = allPosts.map((post) => {
+      const likes = post.extendedLikesInfo;
+      const currentUserLikeStatus = likes.find((l) => l.userId === userId);
+      const likesCount = likes.filter((l) => l.action === 'Like').length;
+      const dislikesCount = likes.filter((l) => l.action === 'Dislike').length;
+      return {
+        id: post.id,
+        title: post.title,
+        shortDescription: post.shortDescription,
+        content: post.content,
+        bloggerId: post.bloggerId,
+        extendedLikesInfo: {
+          likesCount: likesCount,
+          dislikesCount: dislikesCount,
+          myStatus: currentUserLikeStatus
+            ? currentUserLikeStatus.action
+            : 'None',
+          newestLikes: likes
+            .reverse()
+            .slice(0, 3)
+            .map((like) => ({
+              addedAt: like.addedAt,
+              userId: like.userId,
+              login: like.login,
+            })),
+        },
+      };
     });
     return {
       pagesCount,
       page,
       pageSize,
       totalCount,
-      items: allPosts,
+      items: formattedPosts,
     };
   }
 
@@ -62,7 +92,7 @@ export class PostsRepository implements IPostsRepository {
     };
   }
 
-  async getPostWithLikesById(id: string) {
+  async getPostWithLikesById(id: string, userId) {
     // const post = await this.postsModel.aggregate([
     //   { $match: { id } },
     //   { $project: { _id: 0, __v: 0 } },
@@ -104,13 +134,14 @@ export class PostsRepository implements IPostsRepository {
         },
       )
       .lean();
-    const likes = post.extendedLikesInfo.sort((a, b) => b - a);
-    const currentUserLikeStatus = likes.find((l) => l.postId === id);
+    const likes = post.extendedLikesInfo;
+    const currentUserLikeStatus = likes.find((l) => l.userId === userId);
     if (!post) return false;
     const blogger = await this.bloggersService.getBloggerById(post.bloggerId);
     if (!blogger) return false;
     const bloggerName = blogger?.name;
     const likesCount = likes.filter((l) => l.action === 'Like').length;
+    const dislikesCount = likes.filter((l) => l.action === 'Dislike').length;
     return {
       id: post.id,
       title: post.title,
@@ -120,9 +151,9 @@ export class PostsRepository implements IPostsRepository {
       bloggerName,
       extendedLikesInfo: {
         likesCount: likesCount,
-        dislikesCount: likes.filter((l) => l.action === 'Dislike').length,
+        dislikesCount: dislikesCount,
         myStatus: currentUserLikeStatus ? currentUserLikeStatus.action : 'None',
-        newestLikes: likes.slice(0, 3),
+        newestLikes: likes.reverse().slice(0, 3),
       },
     };
   }

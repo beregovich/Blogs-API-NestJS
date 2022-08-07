@@ -5,6 +5,7 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 import {
   CommentType,
   EntityWithPaginationType,
+  LikeType,
   QueryDataType,
 } from '../../types/types';
 import { CommentsRepository } from './comments.repository';
@@ -20,17 +21,18 @@ export class CommentsService {
   async getCommentsByPostId(
     paginationData: QueryDataType,
     PostId: string | null,
+    userId: string | null = null,
   ) {
     const comments = this.commentsRepository.getCommentsByPostId(
       paginationData,
       PostId,
+      userId,
     );
-    const likesData = await this.likesService;
     return comments;
   }
 
-  async getCommentById(commentId: string) {
-    const result = this.commentsRepository.getCommentById(commentId);
+  async getCommentById(commentId: string, userId: string | null) {
+    const result = this.commentsRepository.getCommentById(commentId, userId);
     return result;
   }
 
@@ -55,6 +57,7 @@ export class CommentsService {
       postId,
       userLogin,
       addedAt: new Date(),
+      likesInfo: [],
     };
     const result = this.commentsRepository.createComment(newComment);
     return result;
@@ -63,15 +66,33 @@ export class CommentsService {
   async deleteComment(id: string): Promise<boolean> {
     return this.commentsRepository.deleteComment(id);
   }
+
+  async updateLikeByCommentId(
+    commentId: string,
+    likeStatus: string,
+    userId: string,
+  ) {
+    const currentDate = new Date();
+    const result = this.commentsRepository.updateLikeByCommentId(
+      commentId,
+      likeStatus,
+      userId,
+      currentDate,
+    );
+  }
 }
 
 export interface ICommentsRepository {
   getCommentsByPostId(
     paginationData: QueryDataType,
     PostId: string | null,
+    userId: string | null,
   ): Promise<EntityWithPaginationType<CommentType[]>>;
 
-  getCommentById(commentId: string): Promise<CommentType | null>;
+  getCommentById(
+    commentId: string,
+    userId: string | null,
+  ): Promise<CommentType | null>;
 
   updateCommentById(commentId: string, content: string): any;
 

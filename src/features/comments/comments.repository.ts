@@ -2,19 +2,25 @@ import mongoose from 'mongoose';
 import {
   CommentType,
   EntityWithPaginationType,
+  LikeAction,
   QueryDataType,
 } from '../../types/types';
 import { ICommentsRepository } from './comments.service';
 import { InjectModel } from '@nestjs/mongoose';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class CommentsRepository implements ICommentsRepository {
-  constructor(@InjectModel('Comments') private commentsModel) {}
+  constructor(
+    @InjectModel('Comments') private commentsModel,
+    private readonly usersService: UsersService,
+  ) {}
 
   async getCommentsByPostId(
     paginationData: QueryDataType,
     postId: string | null,
+    userId: string | null,
   ): Promise<EntityWithPaginationType<CommentType[]>> {
     const filter = postId
       ? {
@@ -33,7 +39,7 @@ export class CommentsRepository implements ICommentsRepository {
           },
         };
     const comments = await this.commentsModel
-      .find(filter, { projection: { _id: 0, postId: 0 } })
+      .find(filter, { _id: 0, postId: 0, __v: 0 })
       .skip((paginationData.page - 1) * paginationData.pageSize)
       .limit(paginationData.pageSize)
       .lean();
@@ -51,7 +57,7 @@ export class CommentsRepository implements ICommentsRepository {
   async createComment(newComment: CommentType): Promise<CommentType | null> {
     this.commentsModel.create(newComment);
     const createdComment = this.commentsModel
-      .findOne({ id: newComment.id }, { projection: { _id: 0, postId: 0 } })
+      .findOne({ id: newComment.id }, { _id: 0, postId: 0, __v: 0 })
       .lean();
     return createdComment;
   }
@@ -69,12 +75,75 @@ export class CommentsRepository implements ICommentsRepository {
     return result.matchedCount === 1;
   }
 
-  async getCommentById(commentId: string) {
+  async getCommentById(commentId: string, userId: string | null) {
     const comment = await this.commentsModel.findOne(
       { id: commentId },
       { projection: { _id: 0, postId: 0 } },
     );
-    if (!comment) return null;
-    return comment;
+    if (!comment) throw new NotFoundException();
+    const likes = comment.likesInfo;
+    const likesCount = likes.filter((l) => l.action === 'Dislike').length;
+    const dislikesCount = likes.filter((l) => l.action === 'Dislike').length;
+    const likesInfo = {
+      likesCount,
+      dislikesCount,
+      myStatus: 'None',
+    };
+    return {
+      ...comment,
+      likesInfo,
+    };
+  }
+
+  async updateLikeByCommentId(
+    commentId: string,
+    likeStatus: string,
+    userId: string,
+    addedAt: Date,
+  ) {
+    await this.commentsModel.updateOne(
+      {
+        commentId,
+      },
+      { $pull: { likesInfo: { userId } } },
+    );
+    if (likeStatus != LikeAction.None) {
+      const user = await this.usersService.getUserById(userId);
+      await this.commentsModel.updateOne(
+        { commentId },
+        {
+          $pull: {
+            likesInfo: { userId },
+          },
+        },
+      );
+      const result = this.commentsModel.updateOne(
+        { commentId },
+        {
+          $push: {
+            likesInfo: {
+              action: likeStatus,
+              userId: userId,
+              login: user.accountData.login,
+              addedAt,
+            },
+          },
+        },
+      );
+      // const result = this.commentsModel.findAndModify({
+      //   query: { commentId },
+      //   update: {
+      //     $push: {
+      //       likesInfo: {
+      //         action: likeStatus,
+      //         userId: userId,
+      //         login: user.accountData.login,
+      //         addedAt,
+      //       },
+      //     },
+      //   },
+      // });
+      return result;
+    }
   }
 }

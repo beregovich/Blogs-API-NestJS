@@ -12,6 +12,13 @@ export type BloggerType = {
   youtubeUrl: string | null;
 };
 
+export type LikeType = {
+  userId: string;
+  login: string;
+  action: string;
+  addedAt: Date;
+};
+
 export type CommentType = {
   id: string;
   content: string; //20<len<300
@@ -19,6 +26,11 @@ export type CommentType = {
   userId: string;
   userLogin: string;
   addedAt: Date;
+  likesInfo?: {
+    likesCount: number;
+    dislikesCount: number;
+    myStatus: string;
+  }[];
 };
 
 export type EntityWithPaginationType<T> = {

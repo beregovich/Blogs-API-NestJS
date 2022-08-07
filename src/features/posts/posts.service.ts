@@ -19,19 +19,21 @@ export class PostsService {
     pageSize: number,
     searchNameTerm: string,
     bloggerId: string | null,
+    userId,
   ) {
     const postsToSend = this.postsRepository.getPosts(
       page,
       pageSize,
       searchNameTerm,
       bloggerId,
+      userId,
     );
     return postsToSend;
   }
 
-  async getPostById(id: string): Promise<PostType | false> {
+  async getPostById(id: string, userId: string): Promise<PostType | false> {
     //const post = this.postsRepository.getPostById(id);
-    const post = this.postsRepository.getPostWithLikesById(id);
+    const post = this.postsRepository.getPostWithLikesById(id, userId);
     if (post) {
       return post;
     } else return false;
@@ -55,7 +57,7 @@ export class PostsService {
 
   async updatePostLike(action: LikeAction, userId: string, postId: string) {
     const currentDate = new Date();
-    const result = await this.postsRepository.updatePostLike(
+    const result = this.postsRepository.updatePostLike(
       action,
       userId,
       postId,
@@ -71,6 +73,7 @@ export interface IPostsRepository {
     pageSize: number,
     searchNameTerm: string,
     bloggerId: string | null,
+    userId: string | null,
   ): Promise<EntityWithPaginationType<PostType[]>>;
 
   getPostById(id: string): Promise<PostType | false>;

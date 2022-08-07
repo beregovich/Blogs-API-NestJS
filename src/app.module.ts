@@ -41,6 +41,8 @@ import { Blogger } from './features/bloggers/entities/blogger.entity';
 import { BloggersSqlRepository } from './features/bloggers/infrastructure/bloggers-sql.repository';
 import { typeOrmLocalPostgres } from './config';
 import { PostsSqlRepository } from './features/posts/infrastructure/posts-sql.repository';
+import { JwtPayloadExtractorStrategy } from './guards/common/jwt-payload-extractor.strategy';
+import { JwtPayloadExtractorGuard } from './guards/common/jwt-payload-extractor.guard';
 
 const dbUsername = process.env.POSTGRES_HEROKU_USERNAME;
 const dbPassword = process.env.POSTGRES_HEROKU_PASSWORD;
@@ -101,6 +103,8 @@ const dbPassword = process.env.POSTGRES_HEROKU_PASSWORD;
     LikesRepository,
     LocalStrategy,
     JwtStrategy,
+    JwtPayloadExtractorStrategy,
+    JwtPayloadExtractorGuard,
   ],
 })
 export class AppModule {}

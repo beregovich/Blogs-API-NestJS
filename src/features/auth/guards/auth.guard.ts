@@ -7,7 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UserType } from '../../../types/types';
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 import { UsersRepository } from '../../users/users.repository';
 
 @Injectable()

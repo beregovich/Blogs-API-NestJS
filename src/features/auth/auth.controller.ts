@@ -26,8 +26,15 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  async getUserData() {
-    return null;
+  async getUserData(@Request() req) {
+    const userId = req.user.userId;
+    const user = await this.usersService.getUserById(userId);
+    if (!user) throw new UnauthorizedException();
+    return {
+      email: user.accountData.email,
+      login: user.accountData.login,
+      userId,
+    };
   }
 
   @UseGuards(LocalAuthGuard)
@@ -84,7 +91,7 @@ export class AuthController {
   async refreshToken(@Request() req, @Response() res) {
     if (!req.cookie?.refreshToken) throw new UnauthorizedException();
     const userId = req.user.id;
-    const newTokens = this.authService.createJwtTokensPair(userId);
+    const newTokens = this.authService.createJwtTokensPair(userId, null);
     res.cookie('refreshToken', newTokens.refreshToken, {
       httpOnly: true,
       secure: true,

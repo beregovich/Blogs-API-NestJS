@@ -13,11 +13,12 @@ export class AuthService {
     private usersRepository: UsersRepository,
   ) {}
 
-  createJwtTokensPair(userId: string) {
+  createJwtTokensPair(userId: string, login: string | null) {
     const secretKey = process.env.JWT_SECRET_KEY || 'topSecretKey';
-    const payload: { userId: string; date: Date } = {
+    const payload: { userId: string; date: Date; login: string | null } = {
       userId,
       date: new Date(),
+      login,
     };
     const accessToken = jwt.sign(payload, secretKey, { expiresIn: '1d' });
     const refreshToken = jwt.sign(payload, secretKey, { expiresIn: '30d' });
@@ -42,7 +43,10 @@ export class AuthService {
       user.accountData.passwordHash,
     );
     if (isHashesEquals) {
-      const tokensPair = this.createJwtTokensPair(user.accountData.id);
+      const tokensPair = this.createJwtTokensPair(
+        user.accountData.id,
+        user.accountData.login,
+      );
       return {
         resultCode: 0,
         data: tokensPair,
