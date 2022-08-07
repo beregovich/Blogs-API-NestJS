@@ -43,6 +43,8 @@ import { typeOrmLocalPostgres } from './config';
 import { PostsSqlRepository } from './features/posts/infrastructure/posts-sql.repository';
 import { JwtPayloadExtractorStrategy } from './guards/common/jwt-payload-extractor.strategy';
 import { JwtPayloadExtractorGuard } from './guards/common/jwt-payload-extractor.guard';
+import { RemoveAllController } from './features/testing/testing.controller';
+import { TestingRepository } from './features/testing/testing.repository';
 
 const dbUsername = process.env.POSTGRES_HEROKU_USERNAME;
 const dbPassword = process.env.POSTGRES_HEROKU_PASSWORD;
@@ -72,7 +74,8 @@ const dbPassword = process.env.POSTGRES_HEROKU_PASSWORD;
       synchronize: false,
       ssl: { rejectUnauthorized: false },
     }),
-    TypeOrmModule.forFeature([Blogger]),
+    // TypeOrmModule.forFeature([Blogger]),
+    // AllDataModule,
   ],
   controllers: [
     AppController,
@@ -83,8 +86,10 @@ const dbPassword = process.env.POSTGRES_HEROKU_PASSWORD;
     CommentsController,
     PostsController,
     UsersController,
+    RemoveAllController,
   ],
   providers: [
+    TestingRepository,
     BloggersService,
     BloggersRepository,
     BloggersSqlRepository,

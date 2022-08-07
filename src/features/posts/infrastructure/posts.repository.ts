@@ -12,7 +12,6 @@ export class PostsRepository implements IPostsRepository {
   constructor(
     @InjectModel('Posts') private postsModel,
     @InjectModel('Bloggers') private bloggersModel,
-    @InjectModel('PostsLikes') private postsLikesModel,
     private readonly usersService: UsersService,
     private readonly bloggersService: BloggersService,
   ) {}
