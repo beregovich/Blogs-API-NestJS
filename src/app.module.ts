@@ -99,7 +99,6 @@ const dbPassword = process.env.POSTGRES_HEROKU_PASSWORD;
     NotificationRepository,
     PostsService,
     PostsRepository,
-    PostsSqlRepository,
     UsersService,
     UsersRepository,
     AuthService,
