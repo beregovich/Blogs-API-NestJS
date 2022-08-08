@@ -23,4 +23,10 @@ async function bootstrap() {
   app.use(cookieParser());
   await app.listen(5000);
 }
-bootstrap();
+try {
+  bootstrap();
+} catch (e) {
+  console.log('BOOTSTRAP CALL FAILED');
+  console.log('ERROR: ');
+  console.log(e);
+}
