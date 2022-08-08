@@ -1,10 +1,23 @@
+export type NewestLikesType = {
+  id: string;
+  login: string;
+  addedAt: Date;
+};
+export type ExtendedLikesInfoType = {
+  dislikesCount: number;
+  likesCount: number;
+  myStatus: string;
+  newestLikes: Array<NewestLikesType>;
+};
 export type PostType = {
+  addedAt: Date;
   id?: string;
   title: string | null;
   shortDescription: string | null;
   content: string | null;
   bloggerId: string;
   bloggerName?: string | null;
+  extendedLikesInfo: ExtendedLikesInfoType;
 };
 export type BloggerType = {
   id: string;

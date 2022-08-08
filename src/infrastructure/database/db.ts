@@ -31,6 +31,7 @@ const LikesSchema = new mongoose.Schema<any>({
 });
 
 export const PostsSchema = new mongoose.Schema<any>({
+  addedAt: Date,
   id: String,
   title: String,
   shortDescription: String,

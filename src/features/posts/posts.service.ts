@@ -5,6 +5,7 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import {
   EntityWithPaginationType,
   LikeAction,
+  NewestLikesType,
   PostType,
 } from '../../types/types';
 import { PostsRepository } from './infrastructure/posts.repository';
@@ -44,7 +45,8 @@ export class PostsService {
       ...newPostData,
       id: uuidv4(),
     };
-    return this.postsRepository.createPost(postToCreate);
+    const createdPost = await this.postsRepository.createPost(postToCreate);
+    return createdPost;
   }
 
   async updatePostById(id: string, newPost: PostType) {

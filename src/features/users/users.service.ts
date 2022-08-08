@@ -38,7 +38,7 @@ export class UsersService {
     login: string,
     password: string,
     email: string,
-  ): Promise<UserType | null> {
+  ): Promise<UserViewType | null> {
     const passwordHash = await this.authService._generateHash(password);
     const newUser: UserType = {
       accountData: {
@@ -68,7 +68,10 @@ export class UsersService {
         isSent: false,
         createdAt: new Date(),
       });
-      return createdUser;
+      return {
+        id: createdUser.accountData.id,
+        login: createdUser.accountData.login,
+      };
     } else {
       return null;
     }

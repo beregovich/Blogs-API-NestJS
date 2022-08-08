@@ -15,6 +15,12 @@ export class PostsRepository implements IPostsRepository {
     private readonly usersService: UsersService,
     private readonly bloggersService: BloggersService,
   ) {}
+  private defaultLikesInfo: {
+    dislikesCount: 0;
+    likesCount: 0;
+    myStatus: 'None';
+    newestLikes: [];
+  };
 
   async getPosts(
     page: number,
@@ -82,12 +88,14 @@ export class PostsRepository implements IPostsRepository {
     if (!blogger) return false;
     const bloggerName = blogger.name;
     return {
+      addedAt: post.addedAt,
       id: post.id,
       title: post.title,
       shortDescription: post.shortDescription,
       content: post.content,
       bloggerId: post.bloggerId,
       bloggerName,
+      extendedLikesInfo: this.defaultLikesInfo,
     };
   }
 
@@ -142,6 +150,7 @@ export class PostsRepository implements IPostsRepository {
     const likesCount = likes.filter((l) => l.action === 'Like').length;
     const dislikesCount = likes.filter((l) => l.action === 'Dislike').length;
     return {
+      addedAt: post.addedAt,
       id: post.id,
       title: post.title,
       shortDescription: post.shortDescription,
@@ -158,11 +167,13 @@ export class PostsRepository implements IPostsRepository {
   }
 
   async createPost(newPost: PostType): Promise<PostType | null> {
+    const currentDate = new Date();
     const blogger = await this.bloggersModel.findOne({ id: newPost.bloggerId });
     if (!blogger) return null;
     await this.postsModel.create({
       ...newPost,
       bloggerName: blogger.name,
+      addedAt: currentDate,
     });
     const postToReturn = await this.postsModel.findOne(
       { id: newPost.id },
@@ -220,6 +231,7 @@ export class PostsRepository implements IPostsRepository {
         },
       );
       return result;
+      console.log(result);
     }
     return;
   }

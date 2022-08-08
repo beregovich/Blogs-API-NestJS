@@ -50,10 +50,13 @@ export class UsersRepository implements IUsersRepository {
 
   async createUser(newUser: UserType): Promise<UserType | null> {
     await this.usersModel.create(newUser);
-    const createdUser = await this.usersModel.findOne({
-      'accountData.id': newUser.accountData.id,
-    });
-    return createdUser ? createdUser : null;
+    const createdUser = await this.usersModel.findOne(
+      {
+        'accountData.id': newUser.accountData.id,
+      },
+      { _id: 0, __v: 0 },
+    );
+    return createdUser;
   }
 
   async deleteUserById(id: string): Promise<boolean> {
