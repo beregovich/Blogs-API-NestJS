@@ -92,7 +92,6 @@ const dbPassword = process.env.POSTGRES_HEROKU_PASSWORD;
     TestingRepository,
     BloggersService,
     BloggersRepository,
-    BloggersSqlRepository,
     CommentsService,
     CommentsRepository,
     Scheduler,
