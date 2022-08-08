@@ -1,5 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
-import { EntityWithPaginationType, UserType } from '../../types/types';
+import {
+  EntityWithPaginationType,
+  UserType,
+  UserViewType,
+} from '../../types/types';
 import { addHours } from 'date-fns';
 import { Injectable } from '@nestjs/common';
 import { EmailService } from '../../infrastructure/notification/email.service';
@@ -95,7 +99,7 @@ export interface IUsersRepository {
     page: number,
     pageSize: number,
     searchNameTerm: string,
-  ): Promise<EntityWithPaginationType<UserType[]>>;
+  ): Promise<EntityWithPaginationType<UserViewType[]>>;
 
   createUser(newUser: UserType): Promise<UserType | null>;
 

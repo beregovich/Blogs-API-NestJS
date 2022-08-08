@@ -57,6 +57,12 @@ export type UserType = {
   emailConfirmation: EmailConfirmationType;
 };
 
+export type UserViewType = {
+  id: string;
+  //loginAttempts: LoginAttemptType[],
+  login: string;
+};
+
 export type UserAccountType = {
   id: string;
   email: string;

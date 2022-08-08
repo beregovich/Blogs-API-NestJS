@@ -1,5 +1,9 @@
 import mongoose from 'mongoose';
-import { EntityWithPaginationType, UserType } from '../../types/types';
+import {
+  EntityWithPaginationType,
+  UserType,
+  UserViewType,
+} from '../../types/types';
 import { Injectable } from '@nestjs/common';
 import { addHours } from 'date-fns';
 import { IUsersRepository } from './users.service';
@@ -16,23 +20,31 @@ export class UsersRepository implements IUsersRepository {
     page: number,
     pageSize: number,
     searchNameTerm: string,
-  ): Promise<EntityWithPaginationType<UserType[]>> {
+  ): Promise<EntityWithPaginationType<UserViewType[]>> {
+    console.log('repo');
     const filter = {
       'accountData.login': { $regex: searchNameTerm ? searchNameTerm : '' },
     };
     const users = await this.usersModel
-      .find(filter, { projection: { _id: 0, passwordHash: 0 } })
+      .find(filter, { _id: 0, __v: 0, emailConfirmation: 0 })
       .skip((page - 1) * pageSize)
       .limit(pageSize)
       .lean();
+
+    console.log(users, 'usersFromBase');
     const totalCount = await this.usersModel.countDocuments(filter);
     const pagesCount = Math.ceil(totalCount / pageSize);
+    const usersView = users.map((u) => ({
+      id: u.accountData.id,
+      login: u.accountData.login,
+    }));
+    console.log(usersView, 'users---');
     return {
       pagesCount,
       page,
       pageSize,
       totalCount,
-      items: users,
+      items: usersView,
     };
   }
 
