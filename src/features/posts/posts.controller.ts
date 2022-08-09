@@ -9,6 +9,7 @@ import {
   Put,
   UseGuards,
   Request,
+  HttpCode,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CommentType, LikeAction, PostType } from '../../types/types';
@@ -38,6 +39,7 @@ export class PostsController {
       userId,
     );
   }
+  @HttpCode(200)
   @UseGuards(JwtPayloadExtractorGuard)
   @Get('/:id')
   async getPostById(@Param('id') id: string, @Request() req) {
@@ -84,6 +86,7 @@ export class PostsController {
     );
     return newComment;
   }
+  @HttpCode(201)
   @UseGuards(BaseAuthGuard)
   @Put('/:postId')
   async updatePostById(
@@ -93,17 +96,19 @@ export class PostsController {
     return await this.postsService.updatePostById(postId, postToUpdateData);
   }
   @UseGuards(JwtAuthGuard)
+  @HttpCode(204)
   @Put('/:postId/like-status')
   async updatePostLike(
     @Param('postId') postId: string,
     @Body('likeStatus') likeStatus: string,
     @Request() req,
   ) {
-    return await this.postsService.updatePostLike(
+    await this.postsService.updatePostLike(
       LikeAction[likeStatus],
       req.user.userId,
       postId,
     );
+    return;
   }
   @UseGuards(BaseAuthGuard)
   @Delete('/:postId')

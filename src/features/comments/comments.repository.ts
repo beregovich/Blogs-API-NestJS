@@ -7,7 +7,11 @@ import {
 } from '../../types/types';
 import { ICommentsRepository } from './comments.service';
 import { InjectModel } from '@nestjs/mongoose';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 
 @Injectable()
@@ -101,14 +105,19 @@ export class CommentsRepository implements ICommentsRepository {
     userId: string,
     addedAt: Date,
   ) {
-    await this.commentsModel.updateOne(
-      {
-        commentId,
-      },
-      { $pull: { likesInfo: { userId } } },
-    );
-    if (likeStatus != LikeAction.None) {
+    if (
+      likeStatus == LikeAction.None ||
+      likeStatus == LikeAction.Like ||
+      likeStatus == LikeAction.Dislike
+    ) {
+      await this.commentsModel.updateOne(
+        {
+          commentId,
+        },
+        { $pull: { likesInfo: { userId } } },
+      );
       const user = await this.usersService.getUserById(userId);
+      if (!user) throw new NotFoundException();
       await this.commentsModel.updateOne(
         { commentId },
         {
@@ -143,7 +152,10 @@ export class CommentsRepository implements ICommentsRepository {
       //     },
       //   },
       // });
+      if (result.matchedCount == 0) throw new BadRequestException();
       return result;
+    } else {
+      throw new BadRequestException();
     }
   }
 }

@@ -212,7 +212,7 @@ export class PostsRepository implements IPostsRepository {
     postId: string,
     addedAt: Date,
   ) {
-    const result1 = await this.postsModel.updateOne(
+    await this.postsModel.updateOne(
       {
         id: postId,
       },
@@ -224,6 +224,7 @@ export class PostsRepository implements IPostsRepository {
       action == LikeAction.Dislike
     ) {
       const user = await this.usersService.getUserById(userId);
+      if (!user) throw new NotFoundException();
       const result = await this.postsModel.updateOne(
         { id: postId },
         {

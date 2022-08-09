@@ -16,12 +16,16 @@ import { Pagination } from '../../../infrastructure/common/pagination.service';
 import { CreateBloggerDto } from '../dto/create-blogger.dto';
 import { CommentsService } from '../../comments/comments.service';
 import { BaseAuthGuard } from '../../auth/guards/base-auth.guard';
+import { PostType } from '../../../types/types';
+import { PostsService } from '../../posts/posts.service';
+import { CreatePostDto } from '../dto/create-post.dto';
 
 @Controller('bloggers')
 export class BloggersController {
   constructor(
     private bloggersService: BloggersService,
     private commentsService: CommentsService,
+    private postsService: PostsService,
   ) {}
   @Get()
   async getBloggers(@Query() query) {
@@ -62,8 +66,11 @@ export class BloggersController {
   }
   @UseGuards(BaseAuthGuard)
   @Post(':bloggerId/posts')
-  async createPostByBloggerId(@Param('bloggerId') bloggerId: string) {
-    return 'Coming soon';
+  async createPostByBloggerId(
+    @Param('bloggerId') bloggerId: string,
+    @Body() newPost: CreatePostDto,
+  ) {
+    return await this.postsService.createPost(newPost);
   }
   @UseGuards(BaseAuthGuard)
   @Put(':id')

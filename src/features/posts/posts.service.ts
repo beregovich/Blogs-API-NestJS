@@ -40,7 +40,7 @@ export class PostsService {
     } else return false;
   }
 
-  async createPost(newPostData: PostType): Promise<PostType | null> {
+  async createPost(newPostData): Promise<PostType | null> {
     const postToCreate = {
       ...newPostData,
       id: uuidv4(),
