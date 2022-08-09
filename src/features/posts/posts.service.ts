@@ -78,7 +78,7 @@ export interface IPostsRepository {
     userId: string | null,
   ): Promise<EntityWithPaginationType<PostType[]>>;
 
-  getPostById(id: string): Promise<PostType | false>;
+  getPostById(id: string): Promise<PostType | null>;
 
   createPost(newPostData: PostType): Promise<PostType | null>;
 

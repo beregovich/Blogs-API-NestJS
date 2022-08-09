@@ -70,7 +70,7 @@ export class BloggersController {
     @Param('bloggerId') bloggerId: string,
     @Body() newPost: CreatePostDto,
   ) {
-    return await this.postsService.createPost(newPost);
+    return await this.postsService.createPost({ ...newPost, bloggerId });
   }
   @UseGuards(BaseAuthGuard)
   @Put(':id')

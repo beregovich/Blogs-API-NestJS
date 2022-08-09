@@ -87,9 +87,9 @@ export class PostsRepository implements IPostsRepository {
 
   async getPostById(id: string) {
     const post = await this.postsModel.findOne({ id }, { _id: 0, __v: 0 });
-    if (!post) return false;
+    if (!post) return null;
     const blogger = await this.bloggersService.getBloggerById(post.bloggerId);
-    if (!blogger) return false;
+    if (!blogger) return null;
     const bloggerName = blogger.name;
     return {
       addedAt: post.addedAt,
@@ -145,11 +145,11 @@ export class PostsRepository implements IPostsRepository {
         },
       )
       .lean();
+    if (!post) throw new NotFoundException();
     const likes = post.extendedLikesInfo;
     const currentUserLikeStatus = likes.find((l) => l.userId === userId);
-    if (!post) return false;
     const blogger = await this.bloggersService.getBloggerById(post.bloggerId);
-    if (!blogger) return false;
+    if (!blogger) throw new NotFoundException();
     const bloggerName = blogger?.name;
     const likesCount = likes.filter((l) => l.action === 'Like').length;
     const dislikesCount = likes.filter((l) => l.action === 'Dislike').length;
@@ -166,6 +166,7 @@ export class PostsRepository implements IPostsRepository {
         dislikesCount: dislikesCount,
         myStatus: currentUserLikeStatus ? currentUserLikeStatus.action : 'None',
         newestLikes: likes.reverse().slice(0, 3),
+        extendedLikesInfo: this.defaultLikesInfo,
       },
     };
   }
@@ -179,10 +180,7 @@ export class PostsRepository implements IPostsRepository {
       bloggerName: blogger.name,
       addedAt: currentDate,
     });
-    const postToReturn = await this.postsModel.findOne(
-      { id: newPost.id },
-      { _id: 0, __v: 0 },
-    );
+    const postToReturn = await this.getPostById(newPost.id);
     return postToReturn;
   }
 
