@@ -10,6 +10,7 @@ import {
   UnauthorizedException,
   BadRequestException,
   Res,
+  HttpCode,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegistrationDto } from './dto/registration.dto';
@@ -36,7 +37,7 @@ export class AuthController {
       userId,
     };
   }
-
+  @HttpCode(200)
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req, @Res({ passthrough: true }) res) {

@@ -1,6 +1,10 @@
 import { BloggerType, LikeAction, PostType } from '../../../types/types';
 import mongoose from 'mongoose';
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { IPostsRepository } from '../posts.service';
 import { BloggersRepository } from '../../bloggers/infrastructure/bloggers.repository';
 import { InjectModel } from '@nestjs/mongoose';
@@ -208,17 +212,20 @@ export class PostsRepository implements IPostsRepository {
     postId: string,
     addedAt: Date,
   ) {
-    if (action == LikeAction.None) {
-      await this.postsModel.updateOne(
-        {
-          postId,
-        },
-        { $pull: { extendedLikesInfo: { userId } } },
-      );
-    } else {
+    const result1 = await this.postsModel.updateOne(
+      {
+        id: postId,
+      },
+      { $pull: { extendedLikesInfo: { userId } } },
+    );
+    if (
+      action == LikeAction.None ||
+      action == LikeAction.Like ||
+      action == LikeAction.Dislike
+    ) {
       const user = await this.usersService.getUserById(userId);
       const result = await this.postsModel.updateOne(
-        { postId },
+        { id: postId },
         {
           $push: {
             extendedLikesInfo: {
@@ -230,9 +237,9 @@ export class PostsRepository implements IPostsRepository {
           },
         },
       );
+      if (result.matchedCount == 0) throw new NotFoundException();
       return result;
-      console.log(result);
-    }
+    } else throw new BadRequestException();
     return;
   }
 }
