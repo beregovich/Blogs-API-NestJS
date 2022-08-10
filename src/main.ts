@@ -6,6 +6,10 @@ import { HttpExceptionFilter } from './exception.filter';
 import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
+  console.log('BOOTSTRAP');
+  console.log('BOOTSTRAP..');
+  console.log('BOOTSTRAP...');
+  console.log('BOOTSTRAP....');
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(
     new ValidationPipe({

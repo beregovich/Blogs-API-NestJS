@@ -180,7 +180,7 @@ export class PostsRepository implements IPostsRepository {
       bloggerName: blogger.name,
       addedAt: currentDate,
     });
-    const postToReturn = await this.getPostById(newPost.id);
+    const postToReturn = await this.getPostWithLikesById(newPost.id, null);
     return postToReturn;
   }
 
