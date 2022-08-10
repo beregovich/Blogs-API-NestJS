@@ -63,6 +63,7 @@ export class PostsController {
     );
     return comments;
   }
+
   @UseGuards(BaseAuthGuard)
   @Post('/')
   async createPost(@Body() newPost: PostType) {

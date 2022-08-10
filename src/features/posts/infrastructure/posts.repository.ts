@@ -165,8 +165,14 @@ export class PostsRepository implements IPostsRepository {
         likesCount: likesCount,
         dislikesCount: dislikesCount,
         myStatus: currentUserLikeStatus ? currentUserLikeStatus.action : 'None',
-        newestLikes: likes.reverse().slice(0, 3),
-        extendedLikesInfo: this.defaultLikesInfo,
+        newestLikes: likes
+          .reverse()
+          .slice(0, 3)
+          .map((l) => {
+            delete l.action;
+            return l;
+          }),
+        //extendedLikesInfo: this.defaultLikesInfo,
       },
     };
   }
@@ -205,7 +211,7 @@ export class PostsRepository implements IPostsRepository {
   }
 
   async updatePostLike(
-    action: LikeAction,
+    action: string,
     userId: string,
     postId: string,
     addedAt: Date,

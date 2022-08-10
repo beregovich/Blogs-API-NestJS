@@ -57,7 +57,7 @@ export class PostsService {
     return this.postsRepository.deletePostById(id);
   }
 
-  async updatePostLike(action: LikeAction, userId: string, postId: string) {
+  async updatePostLike(action: string, userId: string, postId: string) {
     const currentDate = new Date();
     const result = this.postsRepository.updatePostLike(
       action,
