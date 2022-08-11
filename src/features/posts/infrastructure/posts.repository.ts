@@ -222,11 +222,7 @@ export class PostsRepository implements IPostsRepository {
       },
       { $pull: { extendedLikesInfo: { userId } } },
     );
-    if (
-      action == LikeAction.None ||
-      action == LikeAction.Like ||
-      action == LikeAction.Dislike
-    ) {
+    if (action == LikeAction.Like || action == LikeAction.Dislike) {
       const user = await this.usersService.getUserById(userId);
       if (!user) throw new NotFoundException();
       const result = await this.postsModel.updateOne(
@@ -242,9 +238,8 @@ export class PostsRepository implements IPostsRepository {
           },
         },
       );
-      if (result.matchedCount == 0) throw new NotFoundException();
+      if (result.matchedCount == 0) throw new BadRequestException();
       return result;
     } else throw new BadRequestException();
-    return;
   }
 }

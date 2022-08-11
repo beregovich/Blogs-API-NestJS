@@ -105,27 +105,15 @@ export class CommentsRepository implements ICommentsRepository {
     userId: string,
     addedAt: Date,
   ) {
-    if (
-      likeStatus == LikeAction.None ||
-      likeStatus == LikeAction.Like ||
-      likeStatus == LikeAction.Dislike
-    ) {
-      await this.commentsModel.updateOne(
-        {
-          commentId,
-        },
-        { $pull: { likesInfo: { userId } } },
-      );
+    await this.commentsModel.updateOne(
+      {
+        commentId,
+      },
+      { $pull: { likesInfo: { userId } } },
+    );
+    if (likeStatus == LikeAction.Like || likeStatus == LikeAction.Dislike) {
       const user = await this.usersService.getUserById(userId);
       if (!user) throw new NotFoundException();
-      await this.commentsModel.updateOne(
-        { commentId },
-        {
-          $pull: {
-            likesInfo: { userId },
-          },
-        },
-      );
       const result = this.commentsModel.updateOne(
         { commentId },
         {
@@ -139,19 +127,6 @@ export class CommentsRepository implements ICommentsRepository {
           },
         },
       );
-      // const result = this.commentsModel.findAndModify({
-      //   query: { commentId },
-      //   update: {
-      //     $push: {
-      //       likesInfo: {
-      //         action: likeStatus,
-      //         userId: userId,
-      //         login: user.accountData.login,
-      //         addedAt,
-      //       },
-      //     },
-      //   },
-      // });
       if (result.matchedCount == 0) throw new BadRequestException();
       return result;
     } else {
