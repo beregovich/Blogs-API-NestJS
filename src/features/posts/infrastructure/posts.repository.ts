@@ -59,6 +59,8 @@ export class PostsRepository implements IPostsRepository {
         shortDescription: post.shortDescription,
         content: post.content,
         bloggerId: post.bloggerId,
+        addedAt: post.addedAt,
+        bloggerName: post.bloggerName,
         extendedLikesInfo: {
           likesCount: likesCount,
           dislikesCount: dislikesCount,

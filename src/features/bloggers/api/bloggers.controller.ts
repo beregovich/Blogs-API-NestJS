@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { BloggersService } from '../application/bloggers.service';
@@ -19,6 +20,7 @@ import { BaseAuthGuard } from '../../auth/guards/base-auth.guard';
 import { PostType } from '../../../types/types';
 import { PostsService } from '../../posts/posts.service';
 import { CreatePostDto } from '../dto/create-post.dto';
+import { JwtPayloadExtractorGuard } from '../../../guards/common/jwt-payload-extractor.guard';
 
 @Controller('bloggers')
 export class BloggersController {
@@ -45,13 +47,21 @@ export class BloggersController {
     //if (!blogger) throw new NotFoundException();
     return blogger;
   }
-
+  @UseGuards(JwtPayloadExtractorGuard)
   @Get(':bloggerId/posts')
-  async getPostsByBloggerId(@Param('id') id: string, @Query() query) {
+  async getPostsByBloggerId(
+    @Param('id') id: string,
+    @Query() query,
+    @Request() req,
+  ) {
     const paginationData = Pagination.getPaginationData(query);
-    const posts = await this.commentsService.getCommentsByPostId(
-      paginationData,
+    const userId = req.user.userId || null;
+    const posts = await this.postsService.getPosts(
+      paginationData.page,
+      paginationData.pageSize,
+      paginationData.searchNameTerm,
       id,
+      userId,
     );
     return posts;
   }
