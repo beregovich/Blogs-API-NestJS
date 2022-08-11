@@ -18,6 +18,7 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 import { JwtPayloadExtractorGuard } from '../../guards/common/jwt-payload-extractor.guard';
 import { Pagination } from '../../infrastructure/common/pagination.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CheckCommentExistingGuard } from '../../guards/auth/check-comment-existing.guard';
 
 @Controller('comments')
 export class CommentsController {
@@ -55,7 +56,7 @@ export class CommentsController {
     );
     return comments;
   }
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, CheckCommentExistingGuard)
   @Put(':commentId/likeStatus')
   async updateLikeByCommentId(
     @Param('commentId') commentId: string,
