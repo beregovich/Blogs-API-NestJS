@@ -18,6 +18,7 @@ import { CommentsService } from '../comments/comments.service';
 import { BaseAuthGuard } from '../auth/guards/base-auth.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { JwtPayloadExtractorGuard } from '../../guards/common/jwt-payload-extractor.guard';
+import { CheckPostExistingGuard } from '../../guards/auth/check-post-existing.guard';
 
 @Controller('posts')
 export class PostsController {
@@ -97,6 +98,7 @@ export class PostsController {
     return await this.postsService.updatePostById(postId, postToUpdateData);
   }
   @UseGuards(JwtAuthGuard)
+  @UseGuards(CheckPostExistingGuard)
   @HttpCode(204)
   @Put('/:postId/like-status')
   async updatePostLike(

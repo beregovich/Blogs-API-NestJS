@@ -45,6 +45,7 @@ import { JwtPayloadExtractorStrategy } from './guards/common/jwt-payload-extract
 import { JwtPayloadExtractorGuard } from './guards/common/jwt-payload-extractor.guard';
 import { RemoveAllController } from './features/testing/testing.controller';
 import { TestingRepository } from './features/testing/testing.repository';
+import { CheckPostExistingGuard } from './guards/auth/check-post-existing.guard';
 
 const dbUsername = process.env.POSTGRES_HEROKU_USERNAME;
 const dbPassword = process.env.POSTGRES_HEROKU_PASSWORD;
@@ -108,6 +109,7 @@ const dbPassword = process.env.POSTGRES_HEROKU_PASSWORD;
     JwtStrategy,
     JwtPayloadExtractorStrategy,
     JwtPayloadExtractorGuard,
+    CheckPostExistingGuard,
   ],
 })
 export class AppModule {}
