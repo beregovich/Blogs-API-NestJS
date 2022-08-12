@@ -10,6 +10,7 @@ import {
   UseGuards,
   Query,
   Request,
+  HttpCode,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -56,6 +57,7 @@ export class CommentsController {
     );
     return comments;
   }
+  @HttpCode(204)
   @UseGuards(CheckCommentExistingGuard)
   @UseGuards(JwtAuthGuard)
   @Put(':commentId/like-status')
