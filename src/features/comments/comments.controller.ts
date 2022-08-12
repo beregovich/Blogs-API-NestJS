@@ -58,9 +58,10 @@ export class CommentsController {
     );
     return comments;
   }
-  @HttpCode(204)
+
+  @UseGuards(JwtAuthGuard)
   @UseGuards(CheckCommentExistingGuard)
-  @UseGuards(JwtPayloadExtractorGuard)
+  @HttpCode(204)
   @Put(':commentId/like-status')
   async updateLikeByCommentId(
     @Param('commentId') commentId: string,
@@ -70,7 +71,7 @@ export class CommentsController {
     const result = await this.commentsService.updateLikeByCommentId(
       commentId,
       likeStatus,
-      req.user.userId,
+      req.user?.userId || null,
     );
     return result;
   }

@@ -15,11 +15,11 @@ export class CheckCommentExistingGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> | null {
     const request: Request = context.switchToHttp().getRequest();
     const commentId = request.params.commentId;
-    const post = await this.commentsService.getCommentById(commentId, null);
-    if (!post)
+    const comment = await this.commentsService.getCommentById(commentId, null);
+    if (!comment)
       throw new NotFoundException({
-        message: 'post not found',
-        field: 'postId',
+        message: 'comment not found',
+        field: 'commentId',
       });
     return true;
   }
