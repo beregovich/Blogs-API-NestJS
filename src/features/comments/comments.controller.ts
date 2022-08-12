@@ -56,9 +56,9 @@ export class CommentsController {
     );
     return comments;
   }
-  @UseGuards(JwtAuthGuard)
   @UseGuards(CheckCommentExistingGuard)
-  @Put(':commentId/likeStatus')
+  @UseGuards(JwtAuthGuard)
+  @Put(':commentId/like-status')
   async updateLikeByCommentId(
     @Param('commentId') commentId: string,
     @Body('likeStatus') likeStatus: any,
