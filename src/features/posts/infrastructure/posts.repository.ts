@@ -107,37 +107,6 @@ export class PostsRepository implements IPostsRepository {
   }
 
   async getPostWithLikesById(id: string, userId) {
-    // const post = await this.postsModel.aggregate([
-    //   { $match: { id } },
-    //   { $project: { _id: 0, __v: 0 } },
-    //
-    //   // {
-    //   //   $group: {
-    //   //     _id: '$extendedLikesInfo.action',
-    //   //     likesCount: { $count: {} },
-    //   //   },
-    //   // },
-    //
-    //   {
-    //     $addFields: {
-    //       likesCount: {
-    //         $size: {
-    //           filter: {
-    //             input: { $ifNull: ['$extendedLikesInfo', []] },
-    //             cond: { $eq: ['$this.action', 'Like'] },
-    //           },
-    //         },
-    //       },
-    //       //       // $filter: {
-    //       //       //   input: '$extendedLikesInfo',
-    //       //       //   as: 's',
-    //       //       //   cond: { $eq: ['$$s.action', 'Dislike'] },
-    //       //       // },
-    //     },
-    //   },
-    // ]);
-
-    //
     const post = await this.postsModel
       .findOne(
         { id },

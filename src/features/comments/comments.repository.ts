@@ -84,11 +84,10 @@ export class CommentsRepository implements ICommentsRepository {
     const comment = await this.commentsModel
       .findOne({ id: commentId }, { _id: 0, postId: 0, __v: 0 })
       .lean();
-    console.log(comment);
     if (!comment) throw new NotFoundException();
     const likes = comment.likesInfo;
-    console.log(likes);
-    const likesCount = likes.filter((l) => l.action === 'Dislike').length;
+    const currentUserLikeStatus = likes.find((l) => l.userId === userId);
+    const likesCount = likes.filter((l) => l.action === 'Like').length;
     const dislikesCount = likes.filter((l) => l.action === 'Dislike').length;
     const likesInfo = {
       likesCount,
@@ -97,7 +96,11 @@ export class CommentsRepository implements ICommentsRepository {
     };
     return {
       ...comment,
-      likesInfo,
+      likesInfo: {
+        likesCount,
+        dislikesCount,
+        myStatus: currentUserLikeStatus ? currentUserLikeStatus.action : 'None',
+      },
     };
   }
 

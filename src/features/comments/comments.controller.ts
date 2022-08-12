@@ -25,6 +25,7 @@ import { CheckCommentExistingGuard } from '../../guards/auth/check-comment-exist
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
+  @UseGuards(JwtPayloadExtractorGuard)
   @Get(':id')
   async findOne(@Param('id') id: string, @Request() req) {
     const userId = req.user?.userId || null;
