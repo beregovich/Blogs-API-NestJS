@@ -60,6 +60,7 @@ export class CommentsController {
   }
   @HttpCode(204)
   @UseGuards(CheckCommentExistingGuard)
+  @UseGuards(JwtPayloadExtractorGuard)
   @Put(':commentId/like-status')
   async updateLikeByCommentId(
     @Param('commentId') commentId: string,
