@@ -59,10 +59,11 @@ export class CommentsRepository implements ICommentsRepository {
   }
 
   async createComment(newComment: CommentType): Promise<CommentType | null> {
-    this.commentsModel.create(newComment);
-    const createdComment = this.commentsModel
-      .findOne({ id: newComment.id }, { _id: 0, postId: 0, __v: 0 })
-      .lean();
+    await this.commentsModel.create(newComment);
+    const createdComment = await this.getCommentById(
+      newComment.id,
+      newComment.userId,
+    );
     return createdComment;
   }
 
@@ -80,12 +81,13 @@ export class CommentsRepository implements ICommentsRepository {
   }
 
   async getCommentById(commentId: string, userId: string | null) {
-    const comment = await this.commentsModel.findOne(
-      { id: commentId },
-      { projection: { _id: 0, postId: 0 } },
-    );
+    const comment = await this.commentsModel
+      .findOne({ id: commentId }, { _id: 0, postId: 0, __v: 0 })
+      .lean();
+    console.log(comment);
     if (!comment) throw new NotFoundException();
     const likes = comment.likesInfo;
+    console.log(likes);
     const likesCount = likes.filter((l) => l.action === 'Dislike').length;
     const dislikesCount = likes.filter((l) => l.action === 'Dislike').length;
     const likesInfo = {

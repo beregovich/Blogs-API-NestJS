@@ -43,7 +43,7 @@ export type CommentType = {
     likesCount: number;
     dislikesCount: number;
     myStatus: string;
-  }[];
+  };
 };
 
 export type EntityWithPaginationType<T> = {

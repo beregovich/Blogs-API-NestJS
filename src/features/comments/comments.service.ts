@@ -17,7 +17,11 @@ export class CommentsService {
     private commentsRepository: CommentsRepository,
     private readonly likesService: LikesService,
   ) {}
-
+  private defaultLikesInfo: {
+    dislikesCount: 0;
+    likesCount: 0;
+    myStatus: 'None';
+  };
   async getCommentsByPostId(
     paginationData: QueryDataType,
     PostId: string | null,
@@ -57,7 +61,7 @@ export class CommentsService {
       postId,
       userLogin,
       addedAt: new Date(),
-      likesInfo: [],
+      likesInfo: this.defaultLikesInfo,
     };
     const result = this.commentsRepository.createComment(newComment);
     return result;
