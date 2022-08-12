@@ -49,12 +49,28 @@ export class CommentsRepository implements ICommentsRepository {
       .lean();
     const totalCount = await this.commentsModel.countDocuments(filter);
     const pagesCount = Math.ceil(totalCount / paginationData.pageSize);
+    const formattedComments = comments.map((comment) => {
+      const likes = comment.likesInfo;
+      const currentUserLikeStatus = likes.find((l) => l.userId === userId);
+      const likesCount = likes.filter((l) => l.action === 'Like').length;
+      const dislikesCount = likes.filter((l) => l.action === 'Dislike').length;
+      return {
+        ...comment,
+        likesInfo: {
+          likesCount: likesCount,
+          dislikesCount: dislikesCount,
+          myStatus: currentUserLikeStatus
+            ? currentUserLikeStatus.action
+            : 'None',
+        },
+      };
+    });
     return {
       pagesCount,
       page: paginationData.page,
       pageSize: paginationData.pageSize,
       totalCount,
-      items: comments,
+      items: formattedComments,
     };
   }
 
