@@ -220,12 +220,20 @@ export class PostsRepository implements IPostsRepository {
     postId: string,
     addedAt: Date,
   ) {
-    await this.postsModel.updateOne(
-      {
-        id: postId,
-      },
-      { $pull: { extendedLikesInfo: { userId } } },
-    );
+    if (
+      action == LikeAction.Like ||
+      action == LikeAction.Dislike ||
+      action == LikeAction.None
+    ) {
+      await this.postsModel.updateOne(
+        {
+          id: postId,
+        },
+        { $pull: { extendedLikesInfo: { userId } } },
+      );
+    } else {
+      throw new BadRequestException();
+    }
     if (action == LikeAction.Like || action == LikeAction.Dislike) {
       const user = await this.usersService.getUserById(userId);
       if (!user) throw new NotFoundException();
@@ -244,6 +252,6 @@ export class PostsRepository implements IPostsRepository {
       );
       if (result.matchedCount == 0) throw new BadRequestException();
       return result;
-    } else throw new BadRequestException();
+    }
   }
 }

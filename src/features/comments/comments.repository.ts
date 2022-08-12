@@ -105,12 +105,21 @@ export class CommentsRepository implements ICommentsRepository {
     userId: string,
     addedAt: Date,
   ) {
-    await this.commentsModel.updateOne(
-      {
-        commentId,
-      },
-      { $pull: { likesInfo: { userId } } },
-    );
+    if (
+      likeStatus == LikeAction.Like ||
+      likeStatus == LikeAction.Dislike ||
+      likeStatus == LikeAction.None
+    ) {
+      await this.commentsModel.updateOne(
+        {
+          commentId,
+        },
+        { $pull: { likesInfo: { userId } } },
+      );
+    } else {
+      throw new BadRequestException();
+    }
+
     if (likeStatus == LikeAction.Like || likeStatus == LikeAction.Dislike) {
       const user = await this.usersService.getUserById(userId);
       if (!user) throw new NotFoundException();
@@ -129,8 +138,6 @@ export class CommentsRepository implements ICommentsRepository {
       );
       if (result.matchedCount == 0) throw new BadRequestException();
       return result;
-    } else {
-      throw new BadRequestException();
     }
   }
 }

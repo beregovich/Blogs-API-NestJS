@@ -106,6 +106,7 @@ export class PostsController {
     @Body('likeStatus') likeStatus: string,
     @Request() req,
   ) {
+    console.log(LikeAction[likeStatus]);
     await this.postsService.updatePostLike(
       LikeAction[likeStatus],
       req.user.userId,
