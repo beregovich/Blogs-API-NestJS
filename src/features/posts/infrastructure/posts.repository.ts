@@ -68,6 +68,7 @@ export class PostsRepository implements IPostsRepository {
             ? currentUserLikeStatus.action
             : 'None',
           newestLikes: likes
+            .filter((l) => l.action === 'Like')
             .reverse()
             .slice(0, 3)
             .map((like) => ({
@@ -168,6 +169,7 @@ export class PostsRepository implements IPostsRepository {
         dislikesCount: dislikesCount,
         myStatus: currentUserLikeStatus ? currentUserLikeStatus.action : 'None',
         newestLikes: likes
+          .filter((l) => l.action === 'Like')
           .reverse()
           .slice(0, 3)
           .map((l) => {
