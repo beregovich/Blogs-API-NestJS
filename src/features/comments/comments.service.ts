@@ -5,6 +5,7 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 import {
   CommentType,
   EntityWithPaginationType,
+  LikeAction,
   LikeType,
   QueryDataType,
 } from '../../types/types';

@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import {
   CommentType,
   EntityWithPaginationType,
@@ -9,10 +8,13 @@ import { ICommentsRepository } from './comments.service';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   BadRequestException,
+  HttpException,
+  HttpStatus,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
+import { UpdateCommentDto } from './dto/update-comment.dto';
 
 @Injectable()
 export class CommentsRepository implements ICommentsRepository {
@@ -138,7 +140,10 @@ export class CommentsRepository implements ICommentsRepository {
         { $pull: { likesInfo: { userId } } },
       );
     } else {
-      throw new BadRequestException();
+      throw new HttpException(
+        { message: [{ field: 'likeStatus', message: 'wrong value' }] },
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     if (likeStatus == LikeAction.Like || likeStatus == LikeAction.Dislike) {

@@ -2,6 +2,8 @@ import { BloggerType, LikeAction, PostType } from '../../../types/types';
 import mongoose from 'mongoose';
 import {
   BadRequestException,
+  HttpException,
+  HttpStatus,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -201,7 +203,10 @@ export class PostsRepository implements IPostsRepository {
         { $pull: { extendedLikesInfo: { userId } } },
       );
     } else {
-      throw new BadRequestException();
+      throw new HttpException(
+        { message: [{ field: 'likeStatus', message: 'wrong value' }] },
+        HttpStatus.BAD_REQUEST,
+      );
     }
     if (action == LikeAction.Like || action == LikeAction.Dislike) {
       const user = await this.usersService.getUserById(userId);

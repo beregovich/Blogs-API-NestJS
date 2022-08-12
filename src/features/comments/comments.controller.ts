@@ -64,10 +64,9 @@ export class CommentsController {
   @Put(':commentId/like-status')
   async updateLikeByCommentId(
     @Param('commentId') commentId: string,
-    @Body('likeStatus') likeStatus: any,
+    @Body('likeStatus') likeStatus: string,
     @Request() req,
   ) {
-    const test = likeStatus;
     const result = await this.commentsService.updateLikeByCommentId(
       commentId,
       likeStatus,
