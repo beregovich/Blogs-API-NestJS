@@ -50,7 +50,7 @@ export class BloggersController {
   @UseGuards(JwtPayloadExtractorGuard)
   @Get(':bloggerId/posts')
   async getPostsByBloggerId(
-    @Param('id') id: string,
+    @Param('bloggerId') bloggerId: string,
     @Query() query,
     @Request() req,
   ) {
@@ -60,7 +60,7 @@ export class BloggersController {
       paginationData.page,
       paginationData.pageSize,
       paginationData.searchNameTerm,
-      id,
+      bloggerId,
       userId,
     );
     return posts;
