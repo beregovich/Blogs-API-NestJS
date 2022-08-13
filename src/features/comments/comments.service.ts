@@ -84,6 +84,7 @@ export class CommentsService {
       userId,
       currentDate,
     );
+    return result;
   }
 }
 

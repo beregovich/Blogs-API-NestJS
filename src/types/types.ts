@@ -125,3 +125,4 @@ export enum LikeAction {
   Dislike = 'Dislike',
   None = 'None',
 }
+export type LikeActionType = 'Like' | 'Dislike' | 'None';
