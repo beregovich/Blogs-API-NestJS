@@ -128,6 +128,12 @@ export class CommentsRepository implements ICommentsRepository {
     userId: string,
     addedAt: Date,
   ) {
+    if (likeStatus === '') {
+      throw new HttpException(
+        { message: [{ field: 'likeStatus', message: 'wrong value' }] },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     if (
       likeStatus == LikeAction.Like ||
       likeStatus == LikeAction.Dislike ||
