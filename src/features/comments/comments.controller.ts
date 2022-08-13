@@ -66,7 +66,7 @@ export class CommentsController {
   async updateLikeByCommentId(
     @Param('commentId') commentId: string,
     @Body(
-      'likeStatus',
+      'likeStatus' /*,
       new ParseEnumPipe(LikeAction, {
         errorHttpStatusCode: HttpStatus.BAD_REQUEST,
         exceptionFactory: (error) => {
@@ -79,7 +79,7 @@ export class CommentsController {
             ],
           });
         },
-      }),
+      }),*/,
     )
     likeStatus: LikeAction,
     @Request() req,
