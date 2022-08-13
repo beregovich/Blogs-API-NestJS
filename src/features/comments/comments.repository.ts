@@ -134,9 +134,7 @@ export class CommentsRepository implements ICommentsRepository {
       likeStatus == LikeAction.None
     ) {
       await this.commentsModel.updateOne(
-        {
-          id: commentId,
-        },
+        { id: commentId },
         { $pull: { likesInfo: { userId } } },
       );
     } else {

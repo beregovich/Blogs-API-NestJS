@@ -1,25 +1,25 @@
 import {
-  Controller,
-  Get,
-  Post,
+  BadRequestException,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseEnumPipe,
   Put,
-  UseGuards,
   Query,
   Request,
-  HttpCode,
+  UseGuards,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { JwtPayloadExtractorGuard } from '../../guards/common/jwt-payload-extractor.guard';
 import { Pagination } from '../../infrastructure/common/pagination.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CheckCommentExistingGuard } from '../../guards/auth/check-comment-existing.guard';
+import { LikeAction } from '../../types/types';
 
 @Controller('comments')
 export class CommentsController {
@@ -65,7 +65,23 @@ export class CommentsController {
   @Put(':commentId/like-status')
   async updateLikeByCommentId(
     @Param('commentId') commentId: string,
-    @Body('likeStatus') likeStatus: string,
+    @Body(
+      'likeStatus',
+      new ParseEnumPipe(LikeAction, {
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+        exceptionFactory: (error) => {
+          throw new BadRequestException({
+            message: [
+              {
+                message: 'wrong value',
+                field: 'likeStatus',
+              },
+            ],
+          });
+        },
+      }),
+    )
+    likeStatus: LikeAction,
     @Request() req,
   ) {
     const result = await this.commentsService.updateLikeByCommentId(
