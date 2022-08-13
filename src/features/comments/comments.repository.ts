@@ -135,7 +135,7 @@ export class CommentsRepository implements ICommentsRepository {
     ) {
       await this.commentsModel.updateOne(
         {
-          commentId,
+          id: commentId,
         },
         { $pull: { likesInfo: { userId } } },
       );
@@ -148,9 +148,9 @@ export class CommentsRepository implements ICommentsRepository {
 
     if (likeStatus == LikeAction.Like || likeStatus == LikeAction.Dislike) {
       const user = await this.usersService.getUserById(userId);
-      if (!user) throw new NotFoundException();
+      if (!user) throw new NotFoundException('User from jwt not found');
       const result = this.commentsModel.updateOne(
-        { commentId },
+        { id: commentId },
         {
           $push: {
             likesInfo: {

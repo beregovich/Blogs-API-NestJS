@@ -210,7 +210,7 @@ export class PostsRepository implements IPostsRepository {
     }
     if (action == LikeAction.Like || action == LikeAction.Dislike) {
       const user = await this.usersService.getUserById(userId);
-      if (!user) throw new NotFoundException();
+      if (!user) throw new NotFoundException('User from jwt not found');
       const result = await this.postsModel.updateOne(
         { id: postId },
         {
