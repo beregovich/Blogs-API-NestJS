@@ -1,12 +1,7 @@
 import { BloggerType, EntityWithPaginationType } from '../../../types/types';
 
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { IBloggersRepository } from '../application/bloggers.service';
-import { InjectModel } from '@nestjs/mongoose';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 
@@ -15,8 +10,6 @@ export class BloggersSqlRepository implements IBloggersRepository {
   constructor(
     @InjectDataSource()
     private readonly dataSource: DataSource,
-    @InjectModel('Bloggers') private bloggersModel,
-    @InjectModel('Posts') private postsModel,
   ) {}
 
   async getBloggers(
@@ -96,14 +89,6 @@ export class BloggersSqlRepository implements IBloggersRepository {
     `,
       [name, youtubeUrl, id],
     );
-    // await this.postsModel.updateMany(
-    //   { bloggerId: id },
-    //   {
-    //     $set: {
-    //       bloggerName: name,
-    //     },
-    //   },
-    // );
     if (result[1] === 0)
       throw new NotFoundException({ field: 'id', message: 'not found' });
     return null;

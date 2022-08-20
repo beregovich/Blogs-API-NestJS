@@ -10,7 +10,7 @@ export class LikesRepository {
     private readonly dataSource: DataSource,
   ) {}
 
-  async updatePostLike(
+  async updateCommentLike(
     id: string,
     likeStatus: LikeAction,
     userId: string,
@@ -20,7 +20,7 @@ export class LikesRepository {
     try {
       const result = await this.dataSource.query(
         `
-    INSERT INTO "PostsLikes" ("id", "userId", "likeStatus", "addedAt", "postId")
+    INSERT INTO "CommentsLikes" ("id", "userId", "likeStatus", "addedAt", "postId")
     VALUES ($1, $2, $3, $4, $5)
     RETURNING ("id", "userId", "likeStatus", "addedAt", "postId");
     `,

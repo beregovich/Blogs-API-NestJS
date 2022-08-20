@@ -79,7 +79,36 @@ export class PostsSqlRepository implements IPostsRepository {
   }
 
   async getPostWithLikesById(id: string) {
-    return null;
+    const post = await this.dataSource.query(
+      `
+      SELECT to_jsonb("Posts"),
+         (SELECT name FROM "Bloggers"
+         WHERE "bloggerId" = Posts.bloggerId) AS bloggerName,
+         (SELECT COUNT(*) FROM "PostsLikes"
+         HAVING "likeStatus" like "Like" 
+         AND "postId" = $1
+         GROUP BY id) AS likesCount,
+         (SELECT COUNT(*) FROM "PostsLikes"
+         HAVING "likeStatus" like "Dislike"
+         AND "postId" = $1
+         GROUP BY id) AS dislikesCount,
+      FROM "Bloggers"
+      WHERE "id" = $1
+      `,
+      [id],
+    );
+    if (post) {
+      return post[0].to_jsonb;
+    } else return null;
+    if (!post) return false;
+    return {
+      id: post.id,
+      title: post.title,
+      shortDescription: post.shortDescription,
+      content: post.content,
+      bloggerId: post.bloggerId,
+      bloggerName: post.bloggerName,
+    };
   }
 
   async createPost(newPost: PostType): Promise<PostType | null> {
