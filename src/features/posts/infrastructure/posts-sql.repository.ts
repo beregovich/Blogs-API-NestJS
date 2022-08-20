@@ -64,38 +64,46 @@ export class PostsSqlRepository implements IPostsRepository {
       `,
       [id],
     );
-    if (post) {
-      return post[0].to_jsonb;
-    } else return null;
-    if (!post) return false;
+    if (!post) return null;
+    const postDocument = post[0].to_jsonb;
     return {
-      id: post.id,
-      title: post.title,
-      shortDescription: post.shortDescription,
-      content: post.content,
-      bloggerId: post.bloggerId,
-      bloggerName: post.bloggerName,
+      id: postDocument.id,
+      title: postDocument.title,
+      shortDescription: postDocument.shortDescription,
+      content: postDocument.content,
+      bloggerId: postDocument.bloggerId,
+      bloggerName: postDocument.bloggerName,
+      addedAt: postDocument.addetAt,
+      extendedLikesInfo: {
+        dislikesCount: 0,
+        likesCount: 0,
+        myStatus: 'None',
+        newestLikes: [],
+      },
     };
   }
 
   async getPostWithLikesById(id: string) {
     const post = await this.dataSource.query(
       `
-      SELECT to_jsonb("Posts"),
-         (SELECT name FROM "Bloggers"
-         WHERE "bloggerId" = Posts.bloggerId) AS bloggerName,
-         (SELECT COUNT(*) FROM "PostsLikes"
-         HAVING "likeStatus" like "Like" 
-         AND "postId" = $1
-         GROUP BY id) AS likesCount,
-         (SELECT COUNT(*) FROM "PostsLikes"
-         HAVING "likeStatus" like "Dislike"
-         AND "postId" = $1
-         GROUP BY id) AS dislikesCount,
-      FROM "Bloggers"
-      WHERE "id" = $1
+      SELECT P."id", P."title", B."name" AS bloggerName,
+         /*(SELECT name FROM "Bloggers"
+         WHERE "id" = P."bloggerId") AS bloggerName,*/
+         COALESCE((SELECT COUNT(*) FROM "PostsLikes"
+            GROUP BY "id"
+            HAVING "likeStatus" = 'Like' 
+            AND "postId" = P."id"), 0) AS likesCount,
+         COALESCE((SELECT COUNT(*) FROM "PostsLikes"
+            GROUP BY id
+            HAVING "likeStatus" = 'Dislike'
+            AND "postId" = P."id"), 0) AS dislikesCount,
+         COALESCE((SELECT "likeStatus" FROM "PostsLikes"
+            WHERE "postId" = P."id"
+            AND "userId" = $2), 'None') AS myStatus
+      FROM "Posts" AS P INNER JOIN "Bloggers" AS B ON P."bloggerId" = B."id"
+      WHERE P."id" = $1
       `,
-      [id],
+      [id, null],
     );
     if (post) {
       return post[0].to_jsonb;
