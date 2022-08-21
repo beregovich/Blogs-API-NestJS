@@ -46,12 +46,16 @@ import { JwtPayloadExtractorGuard } from './guards/common/jwt-payload-extractor.
 import { RemoveAllController } from './features/testing/testing.controller';
 import { TestingRepository } from './features/testing/testing.repository';
 import { CheckPostExistingGuard } from './guards/auth/check-post-existing.guard';
+import { ConfigModule } from '@nestjs/config';
 
 const dbUsername = process.env.POSTGRES_HEROKU_USERNAME;
 const dbPassword = process.env.POSTGRES_HEROKU_PASSWORD;
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+    }),
     MongooseModule.forFeature([
       { name: 'Bloggers', schema: BloggersSchema },
       { name: 'Posts', schema: PostsSchema },
