@@ -54,6 +54,7 @@ const dbPassword = process.env.POSTGRES_HEROKU_PASSWORD;
 @Module({
   imports: [
     ConfigModule.forRoot({
+      isGlobal: true,
       envFilePath: '.env',
     }),
     MongooseModule.forFeature([
@@ -68,17 +69,17 @@ const dbPassword = process.env.POSTGRES_HEROKU_PASSWORD;
     ]),
     DatabaseModule,
     ScheduleModule.forRoot(),
-    // TypeOrmModule.forRoot({
-    //   type: 'postgres',
-    //   host: 'ec2-52-48-159-67.eu-west-1.compute.amazonaws.com',
-    //   port: 5432,
-    //   username: dbUsername,
-    //   password: dbPassword,
-    //   database: 'dd99jeg9lg1amo',
-    //   autoLoadEntities: true,
-    //   synchronize: false,
-    //   ssl: { rejectUnauthorized: false },
-    // }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'ec2-52-48-159-67.eu-west-1.compute.amazonaws.com',
+      port: 5432,
+      username: dbUsername,
+      password: dbPassword,
+      database: 'dd99jeg9lg1amo',
+      autoLoadEntities: true,
+      synchronize: false,
+      ssl: { rejectUnauthorized: false },
+    }),
     // TypeOrmModule.forFeature([Blogger]),
     // AllDataModule,
   ],
@@ -98,6 +99,10 @@ const dbPassword = process.env.POSTGRES_HEROKU_PASSWORD;
     BloggersService,
     BloggersRepository,
     CommentsService,
+    // {
+    //    provide: CommentsSqlRepository,
+    //    as: 'CommentsRepository'
+    // }
     CommentsRepository,
     Scheduler,
     EmailService,
