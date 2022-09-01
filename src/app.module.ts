@@ -36,7 +36,7 @@ import { LikesRepository } from './features/likes/infrastructure/likes.repositor
 import { ScheduleModule } from '@nestjs/schedule';
 import { LocalStrategy } from './features/auth/strategies/local.strategy';
 import { JwtStrategy } from './features/auth/strategies/jwt.strategy';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { Blogger } from './features/bloggers/entities/blogger.entity';
 import { BloggersSqlRepository } from './features/bloggers/infrastructure/bloggers-sql.repository';
 import { typeOrmLocalPostgres } from './config';
@@ -46,16 +46,27 @@ import { JwtPayloadExtractorGuard } from './guards/common/jwt-payload-extractor.
 import { RemoveAllController } from './features/testing/testing.controller';
 import { TestingRepository } from './features/testing/testing.repository';
 import { CheckPostExistingGuard } from './guards/auth/check-post-existing.guard';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import configuration from './config/postgres.configuration';
 
-const dbUsername = process.env.POSTGRES_HEROKU_USERNAME;
-const dbPassword = process.env.POSTGRES_HEROKU_PASSWORD;
+interface IPostgresConfig {
+  type: string;
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+  database: string;
+  autoLoadEntities: boolean;
+  synchronize: boolean;
+  ssl: { rejectUnauthorized: boolean };
+}
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      load: [configuration],
     }),
     MongooseModule.forFeature([
       { name: 'Bloggers', schema: BloggersSchema },
@@ -69,19 +80,14 @@ const dbPassword = process.env.POSTGRES_HEROKU_PASSWORD;
     ]),
     DatabaseModule,
     ScheduleModule.forRoot(),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'ec2-52-48-159-67.eu-west-1.compute.amazonaws.com',
-      port: 5432,
-      username: dbUsername,
-      password: dbPassword,
-      database: 'dd99jeg9lg1amo',
-      autoLoadEntities: true,
-      synchronize: false,
-      ssl: { rejectUnauthorized: false },
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => {
+        return configService.get<TypeOrmModuleOptions>('PostgresHerokuConfig');
+      },
+      inject: [ConfigService],
     }),
     // TypeOrmModule.forFeature([Blogger]),
-    // AllDataModule,
   ],
   controllers: [
     AppController,
@@ -100,9 +106,9 @@ const dbPassword = process.env.POSTGRES_HEROKU_PASSWORD;
     BloggersRepository,
     CommentsService,
     // {
-    //    provide: CommentsSqlRepository,
-    //    as: 'CommentsRepository'
-    // }
+    //   provide: CatsService,
+    //   useClass: CatsService,
+    // },
     CommentsRepository,
     Scheduler,
     EmailService,
