@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import {
@@ -8,12 +8,14 @@ import {
   NewestLikesType,
   PostType,
 } from '../../types/types';
-import { PostsRepository } from './infrastructure/posts.repository';
+import { PostsMongoRepository } from './infrastructure/posts.repository';
 import { PostsSqlRepository } from './infrastructure/posts-sql.repository';
 
 @Injectable()
 export class PostsService {
-  constructor(private postsRepository: PostsRepository) {}
+  constructor(
+    @Inject('PostsRepository') private postsRepository: IPostsRepository,
+  ) {}
 
   async getPosts(
     page: number,
@@ -85,6 +87,15 @@ export interface IPostsRepository {
   updatePostById(id: string, newPost: PostType): any;
 
   deletePostById(id: string): Promise<boolean>;
+
+  getPostWithLikesById(id: string, userId: string): Promise<any>;
+
+  updatePostLike(
+    action: string,
+    userId: string,
+    postId: string,
+    addedAt: Date,
+  ): Promise<any>;
 }
 
 // @Injectable()

@@ -5,7 +5,7 @@ import { IBloggersRepository } from '../application/bloggers.service';
 import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
-export class BloggersRepository implements IBloggersRepository {
+export class BloggersMongoRepository implements IBloggersRepository {
   constructor(
     @InjectModel('Bloggers') private bloggersModel,
     @InjectModel('Posts') private postsModel,

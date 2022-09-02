@@ -8,13 +8,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { IPostsRepository } from '../posts.service';
-import { BloggersRepository } from '../../bloggers/infrastructure/bloggers.repository';
 import { InjectModel } from '@nestjs/mongoose';
 import { BloggersService } from '../../bloggers/application/bloggers.service';
 import { UsersService } from '../../users/users.service';
 
 @Injectable()
-export class PostsRepository implements IPostsRepository {
+export class PostsMongoRepository implements IPostsRepository {
   constructor(
     @InjectModel('Posts') private postsModel,
     @InjectModel('Bloggers') private bloggersModel,

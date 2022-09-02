@@ -179,4 +179,13 @@ export class PostsSqlRepository implements IPostsRepository {
       throw new NotFoundException({ field: 'id', message: 'not found' });
     return null;
   }
+
+  async updatePostLike(
+    action: string,
+    userId: string,
+    postId: string,
+    addedAt: Date,
+  ) {
+    return null;
+  }
 }

@@ -6,13 +6,13 @@ import { BloggersController } from './features/bloggers/api/bloggers.controller'
 import { AuthController } from './features/auth/auth.controller';
 import { CommentsController } from './features/comments/comments.controller';
 import { BloggersService } from './features/bloggers/application/bloggers.service';
-import { BloggersRepository } from './features/bloggers/infrastructure/bloggers.repository';
+import { BloggersMongoRepository } from './features/bloggers/infrastructure/bloggers-mongo.repository';
 import { CommentsService } from './features/comments/comments.service';
 import { Scheduler } from './infrastructure/notification/email.scheduler';
 import { EmailService } from './infrastructure/notification/email.service';
 import { NotificationRepository } from './infrastructure/notification/notification.repository';
 import { PostsService } from './features/posts/posts.service';
-import { PostsRepository } from './features/posts/infrastructure/posts.repository';
+import { PostsMongoRepository } from './features/posts/infrastructure/posts.repository';
 import { UsersService } from './features/users/users.service';
 import { UsersRepository } from './features/users/users.repository';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -103,7 +103,14 @@ interface IPostgresConfig {
   providers: [
     TestingRepository,
     BloggersService,
-    BloggersRepository,
+    {
+      provide: 'BloggersRepository',
+      useClass:
+        process.env.USE_DATABASE === 'SQL'
+          ? BloggersSqlRepository
+          : BloggersMongoRepository,
+      //useValue: BloggersSqlRepository,
+    },
     CommentsService,
     // {
     //   provide: CatsService,
@@ -114,7 +121,13 @@ interface IPostgresConfig {
     EmailService,
     NotificationRepository,
     PostsService,
-    PostsRepository,
+    {
+      provide: 'PostsRepository',
+      useClass:
+        process.env.USE_DATABASE === 'SQL'
+          ? PostsSqlRepository
+          : PostsMongoRepository,
+    },
     UsersService,
     UsersRepository,
     AuthService,
