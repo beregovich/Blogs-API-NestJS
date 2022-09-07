@@ -39,7 +39,7 @@ export class BloggersSqlRepository implements IBloggersRepository {
       pagesCount,
       page,
       pageSize,
-      totalCount: totalCount[0].count,
+      totalCount: parseInt(totalCount[0].count),
       items,
     };
   }

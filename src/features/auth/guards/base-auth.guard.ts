@@ -15,7 +15,7 @@ export class BaseAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const exceptedAuthInput = 'Basic YWRtaW46cXdlcnR5';
     if (!request.headers || !request.headers.authorization) {
-      throw new BadRequestException([{ message: 'No any auth headers' }]);
+      throw new UnauthorizedException([{ message: 'No any auth headers' }]);
     } else {
       if (request.headers.authorization != exceptedAuthInput) {
         throw new UnauthorizedException([

@@ -1,8 +1,10 @@
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { UserType } from '../../types/types';
+import { Injectable } from "@nestjs/common";
 
-export class TestingRepository {
+@Injectable()
+export class TestingMongoRepository {
   constructor(
     @InjectModel('Comments') private commentsModel,
     @InjectModel('Posts') private postsModel,

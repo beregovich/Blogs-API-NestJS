@@ -44,10 +44,11 @@ import { PostsSqlRepository } from './features/posts/infrastructure/posts-sql.re
 import { JwtPayloadExtractorStrategy } from './guards/common/jwt-payload-extractor.strategy';
 import { JwtPayloadExtractorGuard } from './guards/common/jwt-payload-extractor.guard';
 import { RemoveAllController } from './features/testing/testing.controller';
-import { TestingRepository } from './features/testing/testing.repository';
+import { TestingMongoRepository } from './features/testing/testing-mongo.repository';
 import { CheckPostExistingGuard } from './guards/auth/check-post-existing.guard';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from './config/postgres.configuration';
+import { TestingSQLRepository } from "./features/testing/testing-sql.repository";
 
 interface IPostgresConfig {
   type: string;
@@ -87,7 +88,7 @@ interface IPostgresConfig {
       },
       inject: [ConfigService],
     }),
-    // TypeOrmModule.forFeature([Blogger]),
+     //TypeOrmModule.forFeature([Blogger]),
   ],
   controllers: [
     AppController,
@@ -101,7 +102,14 @@ interface IPostgresConfig {
     RemoveAllController,
   ],
   providers: [
-    TestingRepository,
+    {
+      provide: 'TestingRepository',
+      useClass:
+        process.env.USE_DATABASE === 'SQL'
+          ? TestingSQLRepository
+          : TestingMongoRepository,
+    },
+    TestingMongoRepository,
     BloggersService,
     {
       provide: 'BloggersRepository',

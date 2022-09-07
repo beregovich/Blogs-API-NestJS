@@ -2,7 +2,7 @@ import {
   Body,
   Controller,
   Delete,
-  Get,
+  Get, HttpCode,
   HttpException,
   NotFoundException,
   Param,
@@ -10,8 +10,8 @@ import {
   Put,
   Query,
   Request,
-  UseGuards,
-} from '@nestjs/common';
+  UseGuards
+} from "@nestjs/common";
 import { BloggersService } from '../application/bloggers.service';
 import { Pagination } from '../../../infrastructure/common/pagination.service';
 import { CreateBloggerDto } from '../dto/create-blogger.dto';
@@ -83,6 +83,7 @@ export class BloggersController {
     return await this.postsService.createPost({ ...newPost, bloggerId });
   }
   @UseGuards(BaseAuthGuard)
+  @HttpCode(204)
   @Put(':id')
   async updateBlogger(@Param('id') id: string, @Body() bloggerUpdateData) {
     const updatedBlogger = await this.bloggersService.updateBloggerById(
@@ -93,6 +94,7 @@ export class BloggersController {
     return updatedBlogger; // shouldn't return any data according SWAGGER
   }
   @UseGuards(BaseAuthGuard)
+  @HttpCode(204)
   @Delete(':id')
   async deleteBloggerById(@Param('id') id: string) {
     const result = await this.bloggersService.deleteBloggerById(id);
