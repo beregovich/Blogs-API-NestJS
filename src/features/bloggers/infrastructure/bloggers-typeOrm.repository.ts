@@ -2,15 +2,27 @@ import { BloggerType, EntityWithPaginationType } from '../../../types/types';
 
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { IBloggersRepository } from '../application/bloggers.service';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from "@nestjs/typeorm";
+import { DataSource, Repository } from "typeorm";
+import { Blogger } from "../entities/blogger.entity";
 
 @Injectable()
-export class BloggersSqlRepository implements IBloggersRepository {
+export class BloggersTypeOrmRepository implements IBloggersRepository {
   constructor(
+    @InjectRepository(Blogger)
+    private readonly bloggerRepo: Repository<Blogger>,
     @InjectDataSource()
     private readonly dataSource: DataSource,
-  ) {}
+  ) {
+  }
+  //2nd No metadata for Blogger
+  // private readonly bloggerRepo: Repository<Blogger>;
+  // constructor(
+  //   @InjectDataSource()
+  //   private readonly dataSource: DataSource,
+  // ) {
+  //   this.bloggerRepo = this.dataSource.getRepository<Blogger>(Blogger);
+  // }
 
   async getBloggers(
     page: number,
@@ -45,39 +57,26 @@ export class BloggersSqlRepository implements IBloggersRepository {
   }
 
   async getBloggerById(bloggerId: string): Promise<BloggerType | null> {
-    const blogger = await this.dataSource.query(
-      `
-      SELECT to_jsonb("Bloggers") FROM "Bloggers"
-      WHERE id = $1
-      `,
-      [bloggerId],
-    );
-    if (blogger) {
-      return blogger[0].to_jsonb;
-    } else return null;
+    try {
+      console.log('trying getBloggerById')
+      const blogger = await this.bloggerRepo.findOneBy({id: bloggerId})
+      if (!blogger) {
+        return null
+      }
+      return blogger;
+    } catch (e) {
+      console.log('getBloggerById error: ' + e);
+    }
   }
 
   async createBlogger(newBlogger: BloggerType) {
-    try {
-      const result = await this.dataSource.query(
-        `
-    INSERT INTO "Bloggers" ("id", "name", "youtubeUrl")
-    VALUES ($1, $2, $3)
-    RETURNING ("id", "name", "youtubeUrl");
-    `,
-        [newBlogger.id, newBlogger.name, newBlogger.youtubeUrl],
-      );
-      const blogger = await this.dataSource.query(
-        `
-      SELECT to_jsonb("Bloggers") FROM "Bloggers"
-      WHERE id = $1
-      `,
-        [newBlogger.id],
-      );
-      return blogger[0].to_jsonb;
-    } catch (e) {
-      throw new NotFoundException({ error: e });
-    }
+    const blogger = new Blogger();
+    blogger.id = newBlogger.id;
+    blogger.name = newBlogger.name;
+    blogger.youtubeUrl = newBlogger.youtubeUrl;
+    const result = await this.bloggerRepo.save(blogger);
+    console.log(result);
+    return result;
   }
 
   async updateBloggerById(id: string, name: string, youtubeUrl: string) {

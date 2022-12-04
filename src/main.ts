@@ -6,6 +6,19 @@ import { HttpExceptionFilter } from './exception.filter';
 import * as cookieParser from 'cookie-parser';
 import { ConfigService } from '@nestjs/config';
 
+interface ISetModalState {
+  (value: boolean): string
+}
+
+const setModaState = (a: boolean): string  =>{
+  return 'ok'
+}
+function ModalWindow(setModaState: ISetModalState): string {
+  return 'ok';
+}
+ModalWindow(setModaState);
+
+
 interface IPostgresConfig {
   type: string;
   host: string;
@@ -20,11 +33,6 @@ interface IPostgresConfig {
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const configService = app.get(ConfigService);
-  const configHeroku = configService.get<IPostgresConfig>(
-    'PostgresHerokuConfig',
-  );
-  console.dir(configHeroku);
   app.useGlobalPipes(
     new ValidationPipe({
       stopAtFirstError: false,

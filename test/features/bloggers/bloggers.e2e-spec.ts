@@ -89,7 +89,6 @@ describe('BloggersController (e2e)', () => {
       await request(app.getHttpServer())
         .delete('/testing/all-data')
       for(let i=0; i<10; i++){
-        //setTimeout(()=>{}, 200) //ToDo
         await request(app.getHttpServer())
           .post('/bloggers')
           .set({ "Authorization":"Basic YWRtaW46cXdlcnR5" })
@@ -118,17 +117,8 @@ describe('BloggersController (e2e)', () => {
           .send()
           .expect(204)
       }
-      // bloggersIds.forEach(async id=>{
-      //   await request(app.getHttpServer())
-      //     .delete(`/bloggers/${id}`)
-      //     .set({ "Authorization":"Basic YWRtaW46cXdlcnR5" })
-      //     .send()
-      //     .expect(204)
-      //     .then((b)=>console.log(`deleted No${id}`))
-      // })
     })
     it('items array should be empty ', async () => {
-      console.log('check empty');
       const allBloggersAfterDeleteResponse = await request(app.getHttpServer())
         .get('/bloggers/')
         .send()
@@ -159,9 +149,6 @@ describe('BloggersController (e2e)', () => {
       expect(bloggers.totalCount).toBe(11)
       expect(bloggers.pageSize).toBe(10)
       expect(bloggers.pagesCount).toBe(2)
-
     })
   })
-
-
 });

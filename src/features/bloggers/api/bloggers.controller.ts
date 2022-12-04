@@ -30,9 +30,10 @@ export class BloggersController {
     private postsService: PostsService,
   ) {}
   @Get()
-  async getBloggers(@Query() query) {
+  async getBloggers(@Query() query, @Request() req,) {
     const { page, pageSize, searchNameTerm } =
       Pagination.getPaginationData(query);
+    const request = req;
     const bloggers = await this.bloggersService.getBloggers(
       page,
       pageSize,
