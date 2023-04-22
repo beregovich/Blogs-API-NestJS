@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { UsersController } from './features/users/users.controller';
 import { PostsController } from './features/posts/posts.controller';
-import { BloggersController } from './features/bloggers/api/bloggers.controller';
+import { BlogsController } from './features/blogs/api/blogs.controller';
 import { AuthController } from './features/auth/auth.controller';
 import { CommentsController } from './features/comments/comments.controller';
-import { BloggersService } from './features/bloggers/application/bloggers.service';
-import { BloggersMongoRepository } from './features/bloggers/infrastructure/bloggers-mongo.repository';
+import { BlogsService } from './features/blogs/application/blogs.service';
+import { BlogsMongoRepository } from './features/blogs/infrastructure/blogs-mongo.repository';
 import { CommentsService } from './features/comments/comments.service';
 import { Scheduler } from './infrastructure/notification/email.scheduler';
 import { EmailService } from './infrastructure/notification/email.service';
@@ -17,7 +17,7 @@ import { UsersService } from './features/users/users.service';
 import { UsersRepository } from './features/users/users.repository';
 import { MongooseModule } from '@nestjs/mongoose';
 import {
-  BloggersSchema,
+  blogsSchema,
   commentsSchema,
   emailsQueueSchema,
   limitsSchema,
@@ -37,8 +37,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { LocalStrategy } from './features/auth/strategies/local.strategy';
 import { JwtStrategy } from './features/auth/strategies/jwt.strategy';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { Blogger } from './features/bloggers/entities/blogger.entity';
-import { BloggersSqlRepository } from './features/bloggers/infrastructure/bloggers-sql.repository';
+import { Blog } from './features/blogs/entities/blog.entity';
+import { BlogsSqlRepository } from './features/blogs/infrastructure/blogs-sql.repository';
 import { typeOrmLocalPostgres } from './config';
 import { PostsSqlRepository } from './features/posts/infrastructure/posts-sql.repository';
 import { JwtPayloadExtractorStrategy } from './guards/common/jwt-payload-extractor.strategy';
@@ -48,8 +48,8 @@ import { TestingMongoRepository } from './features/testing/testing-mongo.reposit
 import { CheckPostExistingGuard } from './guards/auth/check-post-existing.guard';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from './config/postgres.configuration';
-import { TestingSQLRepository } from "./features/testing/testing-sql.repository";
-import { BloggersTypeOrmRepository } from "./features/bloggers/infrastructure/bloggers-typeOrm.repository";
+import { TestingSQLRepository } from './features/testing/testing-sql.repository';
+import { BlogsTypeOrmRepository } from './features/blogs/infrastructure/blogs-typeOrm.repository';
 
 interface IPostgresConfig {
   type: string;
@@ -71,7 +71,7 @@ interface IPostgresConfig {
       load: [configuration],
     }),
     MongooseModule.forFeature([
-      { name: 'Bloggers', schema: BloggersSchema },
+      { name: 'blogs', schema: blogsSchema },
       { name: 'Posts', schema: PostsSchema },
       { name: 'Users', schema: usersSchema },
       { name: 'Comments', schema: commentsSchema },
@@ -85,28 +85,33 @@ interface IPostgresConfig {
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
-        switch (process.env.USE_DATABASE){
+        switch (process.env.USE_DATABASE) {
           case 'RawSql':
-            return configService.get<TypeOrmModuleOptions>('RawSqlHerokuConfig');
+            return configService.get<TypeOrmModuleOptions>(
+              'RawSqlHerokuConfig',
+            );
             break;
           case 'TypeOrm':
-            return configService.get<TypeOrmModuleOptions>('TypeOrmHerokuConfig');
+            return configService.get<TypeOrmModuleOptions>(
+              'TypeOrmHerokuConfig',
+            );
             break;
           default:
-            return configService.get<TypeOrmModuleOptions>('TypeOrmHerokuConfig');
+            return configService.get<TypeOrmModuleOptions>(
+              'TypeOrmHerokuConfig',
+            );
             break;
         }
       },
       inject: [ConfigService],
     }),
-     TypeOrmModule.forFeature([Blogger]),
-
+    TypeOrmModule.forFeature([Blog]),
   ],
   controllers: [
     AppController,
     UsersController,
     PostsController,
-    BloggersController,
+    BlogsController,
     AuthController,
     CommentsController,
     PostsController,
@@ -123,38 +128,22 @@ interface IPostgresConfig {
           : TestingMongoRepository,
     },
     TestingMongoRepository,
-    //Bloggers
-    BloggersService,
+    //Blogs
+    BlogsService,
     {
-      provide: 'BloggersRepository',
+      provide: 'BlogsRepository',
       useClass: (() => {
-          switch (process.env.USE_REPO){
-            case 'RawSql':
-              return BloggersSqlRepository;
-            case 'TypeOrm':
-              return BloggersTypeOrmRepository;
-            case 'Mongo':
-              return BloggersMongoRepository;
-            default:
-              return BloggersTypeOrmRepository;
-          }
+        switch (process.env.USE_REPO) {
+          case 'RawSql':
+            return BlogsSqlRepository;
+          case 'TypeOrm':
+            return BlogsTypeOrmRepository;
+          case 'Mongo':
+            return BlogsMongoRepository;
+          default:
+            return BlogsTypeOrmRepository;
+        }
       })(),
-      // useFactory: (configService: ConfigService)=>{
-      //   switch (process.env.USE_REPO){
-      //     case 'RawSql':
-      //       return BloggersSqlRepository;
-      //     case 'TypeOrm':
-      //       return BloggersTypeOrmRepository;
-      //     case 'Mongo':
-      //       return BloggersMongoRepository;
-      //     default:
-      //       return BloggersTypeOrmRepository;
-      //   }
-      // },
-      // useClass:
-      //   process.env.USE_DATABASE === 'RawSql'
-      //     ? BloggersSqlRepository
-      //     : BloggersMongoRepository,
     },
     //Comments
     CommentsService,

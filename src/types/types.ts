@@ -15,11 +15,11 @@ export type PostType = {
   title: string | null;
   shortDescription: string | null;
   content: string | null;
-  bloggerId: string;
-  bloggerName?: string | null;
+  blogId: string;
+  blogName?: string | null;
   extendedLikesInfo: ExtendedLikesInfoType;
 };
-export type BloggerType = {
+export type BlogType = {
   id: string;
   name: string | null;
   youtubeUrl: string | null;

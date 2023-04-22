@@ -1,26 +1,26 @@
-import { BloggerType, EntityWithPaginationType } from '../../../types/types';
+import { BlogType, EntityWithPaginationType } from '../../../types/types';
 
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { IBloggersRepository } from '../application/bloggers.service';
+import { IBlogsRepository } from '../application/blogs.service';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 
 @Injectable()
-export class BloggersSqlRepository implements IBloggersRepository {
+export class BlogsSqlRepository implements IBlogsRepository {
   constructor(
     @InjectDataSource()
     private readonly dataSource: DataSource,
   ) {}
 
-  async getBloggers(
+  async getBlogs(
     page: number,
     pageSize: number,
     searchNameTerm: string,
-  ): Promise<EntityWithPaginationType<BloggerType[]>> {
+  ): Promise<EntityWithPaginationType<BlogType[]>> {
     const searchTerm = searchNameTerm ? searchNameTerm : '';
-    const blogger = await this.dataSource.query(
+    const blog = await this.dataSource.query(
       `
-    SELECT to_jsonb("Bloggers") FROM "Bloggers"
+    SELECT to_jsonb("blogs") FROM "blogs"
     WHERE "name" like $3
     ORDER BY "name" DESC
     OFFSET $1 ROWS FETCH NEXT $2 ROWS ONLY
@@ -28,12 +28,12 @@ export class BloggersSqlRepository implements IBloggersRepository {
       [(page - 1) * pageSize, pageSize, `%${searchTerm}%`],
     );
     const totalCount = await this.dataSource.query(
-      `SELECT COUNT(name) FROM public."Bloggers"
+      `SELECT COUNT(name) FROM public."blogs"
               WHERE "name" like $1`,
       [`%${searchTerm}%`],
     );
-    const items: BloggerType[] = [];
-    blogger.forEach((b) => items.push(b.to_jsonb));
+    const items: BlogType[] = [];
+    blog.forEach((b) => items.push(b.to_jsonb));
     const pagesCount = Math.ceil(totalCount[0].count / pageSize);
     return {
       pagesCount,
@@ -44,46 +44,46 @@ export class BloggersSqlRepository implements IBloggersRepository {
     };
   }
 
-  async getBloggerById(bloggerId: string): Promise<BloggerType | null> {
-    const blogger = await this.dataSource.query(
+  async getBlogById(blogId: string): Promise<BlogType | null> {
+    const blog = await this.dataSource.query(
       `
-      SELECT to_jsonb("Bloggers") FROM "Bloggers"
+      SELECT to_jsonb("blogs") FROM "blogs"
       WHERE id = $1
       `,
-      [bloggerId],
+      [blogId],
     );
-    if (blogger) {
-      return blogger[0].to_jsonb;
+    if (blog) {
+      return blog[0].to_jsonb;
     } else return null;
   }
 
-  async createBlogger(newBlogger: BloggerType) {
+  async createBlog(newblog: BlogType) {
     try {
       const result = await this.dataSource.query(
         `
-    INSERT INTO "Bloggers" ("id", "name", "youtubeUrl")
+    INSERT INTO "blogs" ("id", "name", "youtubeUrl")
     VALUES ($1, $2, $3)
     RETURNING ("id", "name", "youtubeUrl");
     `,
-        [newBlogger.id, newBlogger.name, newBlogger.youtubeUrl],
+        [newblog.id, newblog.name, newblog.youtubeUrl],
       );
-      const blogger = await this.dataSource.query(
+      const blog = await this.dataSource.query(
         `
-      SELECT to_jsonb("Bloggers") FROM "Bloggers"
+      SELECT to_jsonb("blogs") FROM "blogs"
       WHERE id = $1
       `,
-        [newBlogger.id],
+        [newblog.id],
       );
-      return blogger[0].to_jsonb;
+      return blog[0].to_jsonb;
     } catch (e) {
       throw new NotFoundException({ error: e });
     }
   }
 
-  async updateBloggerById(id: string, name: string, youtubeUrl: string) {
+  async updateBlogById(id: string, name: string, youtubeUrl: string) {
     const result = await this.dataSource.query(
       `
-    UPDATE "Bloggers"
+    UPDATE "blogs"
     SET "name"=$1, "youtubeUrl"=$2
     WHERE id = $3
     `,
@@ -94,10 +94,10 @@ export class BloggersSqlRepository implements IBloggersRepository {
     return null;
   }
 
-  async deleteBloggerById(id: string): Promise<boolean> {
+  async deleteBlogById(id: string): Promise<boolean> {
     const result = await this.dataSource.query(
       `
-    DELETE FROM "Bloggers"
+    DELETE FROM "blogs"
     WHERE id = $1
     `,
       [id],

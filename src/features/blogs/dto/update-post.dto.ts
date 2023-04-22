@@ -1,7 +1,7 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { CreateBloggerDto } from './create-blogger.dto';
+import { CreateBlogDto } from './create-blog.dto';
 
-export class UpdateBloggerDto extends PartialType(CreateBloggerDto) {}
+export class UpdateblogDto extends PartialType(CreateBlogDto) {}
 /*
 class User {
   public name: string;

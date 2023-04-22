@@ -69,7 +69,7 @@ export class UsersSqlRepository implements IUsersRepository {
   async deleteUserById(id: string): Promise<boolean> {
     const result = await this.dataSource.query(
       `
-    DELETE FROM "Bloggers"
+    DELETE FROM "blogs"
     WHERE id = $1
     `,
       [id],
@@ -84,15 +84,15 @@ export class UsersSqlRepository implements IUsersRepository {
   }
 
   async findUserById(id: string): Promise<UserType | null> {
-    const blogger = await this.dataSource.query(
+    const blog = await this.dataSource.query(
       `
-      SELECT to_jsonb("Bloggers") FROM "Bloggers"
+      SELECT to_jsonb("blogs") FROM "blogs"
       WHERE id = $1
       `,
       [id],
     );
-    if (blogger) {
-      return blogger[0].to_jsonb;
+    if (blog) {
+      return blog[0].to_jsonb;
     } else return null;
   }
 }

@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import mongoose, { Schema } from 'mongoose';
 import {
-  BloggerType,
+  BlogType,
   CommentType,
   EmailConfirmationMessageType,
   EmailConfirmationType,
@@ -17,7 +17,7 @@ import { Prop } from '@nestjs/mongoose';
 const mongoUri = process.env.mongoURI || '';
 
 //Schemas
-export const BloggersSchema = new mongoose.Schema<BloggerType>({
+export const blogsSchema = new mongoose.Schema<BlogType>({
   id: String,
   name: String,
   youtubeUrl: String,
@@ -36,8 +36,8 @@ export const PostsSchema = new mongoose.Schema<any>({
   title: String,
   shortDescription: String,
   content: String,
-  bloggerId: String,
-  bloggerName: String,
+  blogId: String,
+  blogName: String,
   extendedLikesInfo: [LikesSchema],
 });
 

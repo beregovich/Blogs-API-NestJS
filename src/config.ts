@@ -4,7 +4,7 @@ export const typeOrmLocalPostgres = {
   port: 5432,
   username: process.env.POSTGRES_LOCAL_USERNAME,
   password: process.env.POSTGRES_LOCAL_PASSWORD,
-  database: 'bloggersApi',
+  database: 'blogsApi',
   autoLoadEntities: true,
   synchronize: false,
 };

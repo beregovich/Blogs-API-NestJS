@@ -3,7 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { IPostsRepository } from '../posts.service';
 
 import { InjectModel } from '@nestjs/mongoose';
-import { BloggersService } from '../../bloggers/application/bloggers.service';
+import { BlogsService } from '../../blogs/application/blogs.service';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 
@@ -18,27 +18,27 @@ export class PostsSqlRepository implements IPostsRepository {
     page: number,
     pageSize: number,
     searchNameTerm: string,
-    bloggerId: string | null,
+    blogId: string | null,
   ) {
-    const filterByBlogger = bloggerId ? bloggerId : '';
+    const filterByblog = blogId ? blogId : '';
     const totalCount = await this.dataSource.query(
       `SELECT COUNT(id) FROM public."Posts"
               WHERE "title" like $1 
-              AND "bloggerId" like $2`,
-      [`%${searchNameTerm}%`, `%${filterByBlogger}%`],
+              AND "blogId" like $2`,
+      [`%${searchNameTerm}%`, `%${filterByblog}%`],
     );
     const pagesCount = Math.ceil(totalCount[0].count / pageSize);
     const allPosts = await this.dataSource.query(
       `
     SELECT to_jsonb("Posts") FROM "Posts"
     WHERE "title" like $1
-    AND "bloggerId" like $2
+    AND "blogId" like $2
     ORDER BY "title" DESC
     OFFSET $3 ROWS FETCH NEXT $4 ROWS ONLY
     `,
       [
         `%${searchNameTerm}%`,
-        `%${filterByBlogger}%`,
+        `%${filterByblog}%`,
         (page - 1) * pageSize,
         pageSize,
       ],
@@ -57,9 +57,9 @@ export class PostsSqlRepository implements IPostsRepository {
     const post = await this.dataSource.query(
       `
       SELECT to_jsonb("Posts"),
-         (SELECT name FROM "Bloggers"
-         WHERE "bloggerId" = Posts.bloggerId) AS bloggerName
-      FROM "Bloggers"
+         (SELECT name FROM "blogs"
+         WHERE "blogId" = Posts.blogId) AS blogName
+      FROM "blogs"
       WHERE "id" = $1
       `,
       [id],
@@ -71,8 +71,8 @@ export class PostsSqlRepository implements IPostsRepository {
       title: postDocument.title,
       shortDescription: postDocument.shortDescription,
       content: postDocument.content,
-      bloggerId: postDocument.bloggerId,
-      bloggerName: postDocument.bloggerName,
+      blogId: postDocument.blogId,
+      blogName: postDocument.blogName,
       addedAt: postDocument.addetAt,
       extendedLikesInfo: {
         dislikesCount: 0,
@@ -86,9 +86,9 @@ export class PostsSqlRepository implements IPostsRepository {
   async getPostWithLikesById(id: string) {
     const post = await this.dataSource.query(
       `
-      SELECT P."id", P."title", B."name" AS bloggerName,
-         /*(SELECT name FROM "Bloggers"
-         WHERE "id" = P."bloggerId") AS bloggerName,*/
+      SELECT P."id", P."title", B."name" AS blogName,
+         /*(SELECT name FROM "blogs"
+         WHERE "id" = P."blogId") AS blogName,*/
          COALESCE((SELECT COUNT(*) FROM "PostsLikes"
             GROUP BY "id"
             HAVING "likeStatus" = 'Like' 
@@ -100,7 +100,7 @@ export class PostsSqlRepository implements IPostsRepository {
          COALESCE((SELECT "likeStatus" FROM "PostsLikes"
             WHERE "postId" = P."id"
             AND "userId" = $2), 'None') AS myStatus
-      FROM "Posts" AS P INNER JOIN "Bloggers" AS B ON P."bloggerId" = B."id"
+      FROM "Posts" AS P INNER JOIN "blogs" AS B ON P."blogId" = B."id"
       WHERE P."id" = $1
       `,
       [id, null],
@@ -114,34 +114,34 @@ export class PostsSqlRepository implements IPostsRepository {
       title: post.title,
       shortDescription: post.shortDescription,
       content: post.content,
-      bloggerId: post.bloggerId,
-      bloggerName: post.bloggerName,
+      blogId: post.blogId,
+      blogName: post.blogName,
     };
   }
 
   async createPost(newPost: PostType): Promise<PostType | null> {
     await this.dataSource.query(
       `
-    INSERT INTO "Posts" ("id", "title", "shortDescription", "content", "bloggerId")
+    INSERT INTO "Posts" ("id", "title", "shortDescription", "content", "blogId")
     VALUES ($1, $2, $3, $4, $5)
-    RETURNING ("id", "title", "shortDescription", "content", "bloggerId");
+    RETURNING ("id", "title", "shortDescription", "content", "blogId");
     `,
       [
         newPost.id,
         newPost.title,
         newPost.shortDescription,
         newPost.content,
-        newPost.bloggerId,
+        newPost.blogId,
       ],
     );
-    const blogger = await this.dataSource.query(
+    const blog = await this.dataSource.query(
       `
       SELECT to_jsonb("Posts") FROM "Posts"
       WHERE id = $1
       `,
       [newPost.id],
     );
-    return blogger[0].to_jsonb;
+    return blog[0].to_jsonb;
   }
 
   async updatePostById(id: string, newPost: PostType) {
@@ -151,14 +151,14 @@ export class PostsSqlRepository implements IPostsRepository {
     SET "title"=$1, 
     "shortDescription"=$2, 
     "content"=$3, 
-    "bloggerId"=$4
+    "blogId"=$4
     WHERE id = $5
     `,
       [
         newPost.title,
         newPost.shortDescription,
         newPost.content,
-        newPost.bloggerId,
+        newPost.blogId,
         id,
       ],
     );

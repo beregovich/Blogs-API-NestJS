@@ -2,7 +2,8 @@ import {
   Body,
   Controller,
   Delete,
-  Get, HttpCode,
+  Get,
+  HttpCode,
   HttpException,
   NotFoundException,
   Param,
@@ -10,11 +11,11 @@ import {
   Put,
   Query,
   Request,
-  UseGuards
-} from "@nestjs/common";
-import { BloggersService } from '../application/bloggers.service';
+  UseGuards,
+} from '@nestjs/common';
+import { BlogsService } from '../application/blogs.service';
 import { Pagination } from '../../../infrastructure/common/pagination.service';
-import { CreateBloggerDto } from '../dto/create-blogger.dto';
+import { CreateBlogDto } from '../dto/create-blog.dto';
 import { CommentsService } from '../../comments/comments.service';
 import { BaseAuthGuard } from '../../auth/guards/base-auth.guard';
 import { PostType } from '../../../types/types';
@@ -22,36 +23,34 @@ import { PostsService } from '../../posts/posts.service';
 import { CreatePostDto } from '../dto/create-post.dto';
 import { JwtPayloadExtractorGuard } from '../../../guards/common/jwt-payload-extractor.guard';
 
-@Controller('bloggers')
-export class BloggersController {
+@Controller('blogs')
+export class BlogsController {
   constructor(
-    private bloggersService: BloggersService,
+    private blogsService: BlogsService,
     private commentsService: CommentsService,
     private postsService: PostsService,
   ) {}
   @Get()
-  async getBloggers(@Query() query, @Request() req,) {
+  async getBlogs(@Query() query, @Request() req) {
     const { page, pageSize, searchNameTerm } =
       Pagination.getPaginationData(query);
     const request = req;
-    const bloggers = await this.bloggersService.getBloggers(
+    const blogs = await this.blogsService.getBlogs(
       page,
       pageSize,
       searchNameTerm,
     );
-    return bloggers;
+    return blogs;
   }
 
   @Get(':id')
-  async getBloggerById(@Param('id') id: string) {
-    const blogger = await this.bloggersService.getBloggerById(id);
-    //if (!blogger) throw new NotFoundException();
-    return blogger;
+  async getBlogById(@Param('id') id: string) {
+    return await this.blogsService.getBlogById(id);
   }
   @UseGuards(JwtPayloadExtractorGuard)
-  @Get(':bloggerId/posts')
-  async getPostsByBloggerId(
-    @Param('bloggerId') bloggerId: string,
+  @Get(':blogId/posts')
+  async getPostsByBlogId(
+    @Param('blogId') blogId: string,
     @Query() query,
     @Request() req,
   ) {
@@ -61,44 +60,47 @@ export class BloggersController {
       paginationData.page,
       paginationData.pageSize,
       paginationData.searchNameTerm,
-      bloggerId,
+      blogId,
       userId,
     );
     return posts;
   }
   @UseGuards(BaseAuthGuard)
   @Post()
-  async createBlogger(@Body() bloggerDto: CreateBloggerDto) {
-    const newBlogger = await this.bloggersService.createBlogger(
-      bloggerDto.name,
-      bloggerDto.youtubeUrl,
+  async createBlog(@Body() blogDto: CreateBlogDto) {
+    const newBlog = await this.blogsService.createBlog(
+      blogDto.name,
+      blogDto.youtubeUrl,
     );
-    return newBlogger;
+    return newBlog;
   }
   @UseGuards(BaseAuthGuard)
-  @Post(':bloggerId/posts')
-  async createPostByBloggerId(
-    @Param('bloggerId') bloggerId: string,
+  @Post(':blogId/posts')
+  async createPostByBlogId(
+    @Param('blogId') blogId: string,
     @Body() newPost: CreatePostDto,
   ) {
-    return await this.postsService.createPost({ ...newPost, bloggerId });
+    return await this.postsService.createPost({
+      ...newPost,
+      blogId: blogId,
+    });
   }
   @UseGuards(BaseAuthGuard)
   @HttpCode(204)
   @Put(':id')
-  async updateBlogger(@Param('id') id: string, @Body() bloggerUpdateData) {
-    const updatedBlogger = await this.bloggersService.updateBloggerById(
+  async updateBlog(@Param('id') id: string, @Body() blogUpdateData) {
+    const updatedBlog = await this.blogsService.updateBlogById(
       id,
-      bloggerUpdateData.name,
-      bloggerUpdateData.youtubeUrl,
+      blogUpdateData.name,
+      blogUpdateData.youtubeUrl,
     );
-    return updatedBlogger; // shouldn't return any data according SWAGGER
+    return updatedBlog; // shouldn't return any data according SWAGGER
   }
   @UseGuards(BaseAuthGuard)
   @HttpCode(204)
   @Delete(':id')
-  async deleteBloggerById(@Param('id') id: string) {
-    const result = await this.bloggersService.deleteBloggerById(id);
+  async deleteBlogById(@Param('id') id: string) {
+    const result = await this.blogsService.deleteBlogById(id);
     return result; // shouldn't return any data according SWAGGER
   }
 }

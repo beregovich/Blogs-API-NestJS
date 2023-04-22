@@ -1,5 +1,5 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Blogger } from "../../bloggers/entities/blogger.entity";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Blog } from '../../blogs/entities/blog.entity';
 
 @Entity()
 export class Post {
@@ -18,7 +18,6 @@ export class Post {
   @Column()
   createdAt: Date;
 
-  @ManyToOne(()=>Blogger, (blogger)=>blogger.posts)
-  blogger: Blogger
-
+  @ManyToOne(() => Blog, (blog) => blog.posts)
+  blog: Blog;
 }

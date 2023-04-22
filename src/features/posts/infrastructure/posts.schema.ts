@@ -6,8 +6,8 @@ export class PostsWithLikes {
   title: string;
   shortDescription: string;
   content: string;
-  bloggerId: string;
-  bloggerName: string;
+  blogId: string;
+  blogName: string;
   Likes: [{ type: Schema.Types.ObjectId; ref: 'PostsLikes' }];
 }
 export const PostsWithLikesSchema =

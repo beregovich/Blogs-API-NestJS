@@ -1,4 +1,4 @@
-import { BloggerType, LikeAction, PostType } from '../../../types/types';
+import { BlogType, LikeAction, PostType } from '../../../types/types';
 import mongoose from 'mongoose';
 import {
   BadRequestException,
@@ -9,16 +9,16 @@ import {
 } from '@nestjs/common';
 import { IPostsRepository } from '../posts.service';
 import { InjectModel } from '@nestjs/mongoose';
-import { BloggersService } from '../../bloggers/application/bloggers.service';
+import { BlogsService } from '../../blogs/application/blogs.service';
 import { UsersService } from '../../users/users.service';
 
 @Injectable()
 export class PostsMongoRepository implements IPostsRepository {
   constructor(
     @InjectModel('Posts') private postsModel,
-    @InjectModel('Bloggers') private bloggersModel,
+    @InjectModel('blogs') private blogsModel,
     private readonly usersService: UsersService,
-    private readonly bloggersService: BloggersService,
+    private readonly blogsService: BlogsService,
   ) {}
   private defaultLikesInfo: {
     dislikesCount: 0;
@@ -31,11 +31,11 @@ export class PostsMongoRepository implements IPostsRepository {
     page: number,
     pageSize: number,
     searchNameTerm: string,
-    bloggerId: string | null,
+    blogId: string | null,
     userId: string | null,
   ) {
-    const filter = bloggerId
-      ? { title: { $regex: searchNameTerm ? searchNameTerm : '' }, bloggerId }
+    const filter = blogId
+      ? { title: { $regex: searchNameTerm ? searchNameTerm : '' }, blogId }
       : { title: { $regex: searchNameTerm ? searchNameTerm : '' } };
     const totalCount = await this.postsModel.countDocuments(filter);
     const pagesCount = Math.ceil(totalCount / pageSize);
@@ -59,9 +59,9 @@ export class PostsMongoRepository implements IPostsRepository {
         title: post.title,
         shortDescription: post.shortDescription,
         content: post.content,
-        bloggerId: post.bloggerId,
+        blogId: post.blogId,
         addedAt: post.addedAt,
-        bloggerName: post.bloggerName,
+        blogName: post.blogName,
         extendedLikesInfo: {
           likesCount: likesCount,
           dislikesCount: dislikesCount,
@@ -92,17 +92,17 @@ export class PostsMongoRepository implements IPostsRepository {
   async getPostById(id: string) {
     const post = await this.postsModel.findOne({ id }, { _id: 0, __v: 0 });
     if (!post) return null;
-    const blogger = await this.bloggersService.getBloggerById(post.bloggerId);
-    if (!blogger) return null;
-    const bloggerName = blogger.name;
+    const blog = await this.blogsService.getBlogById(post.blogId);
+    if (!blog) return null;
+    const blogName = blog.name;
     return {
       addedAt: post.addedAt,
       id: post.id,
       title: post.title,
       shortDescription: post.shortDescription,
       content: post.content,
-      bloggerId: post.bloggerId,
-      bloggerName,
+      blogId: post.blogId,
+      blogName,
       extendedLikesInfo: this.defaultLikesInfo,
     };
   }
@@ -121,9 +121,9 @@ export class PostsMongoRepository implements IPostsRepository {
     if (!post) throw new NotFoundException();
     const likes = post.extendedLikesInfo;
     const currentUserLikeStatus = likes.find((l) => l.userId === userId);
-    const blogger = await this.bloggersService.getBloggerById(post.bloggerId);
-    if (!blogger) throw new NotFoundException();
-    const bloggerName = blogger?.name;
+    const blog = await this.blogsService.getBlogById(post.blogId);
+    if (!blog) throw new NotFoundException();
+    const blogName = blog?.name;
     const likesCount = likes.filter((l) => l.action === 'Like').length;
     const dislikesCount = likes.filter((l) => l.action === 'Dislike').length;
     return {
@@ -132,8 +132,8 @@ export class PostsMongoRepository implements IPostsRepository {
       title: post.title,
       shortDescription: post.shortDescription,
       content: post.content,
-      bloggerId: post.bloggerId,
-      bloggerName,
+      blogId: post.blogId,
+      blogName,
       extendedLikesInfo: {
         likesCount: likesCount,
         dislikesCount: dislikesCount,
@@ -153,11 +153,11 @@ export class PostsMongoRepository implements IPostsRepository {
 
   async createPost(newPost: PostType): Promise<PostType | null> {
     const currentDate = new Date();
-    const blogger = await this.bloggersModel.findOne({ id: newPost.bloggerId });
-    if (!blogger) return null;
+    const blog = await this.blogsModel.findOne({ id: newPost.blogId });
+    if (!blog) return null;
     await this.postsModel.create({
       ...newPost,
-      bloggerName: blogger.name,
+      blogName: blog.name,
       addedAt: currentDate,
     });
     const postToReturn = await this.getPostWithLikesById(newPost.id, null);
@@ -172,7 +172,7 @@ export class PostsMongoRepository implements IPostsRepository {
           title: newPost.title,
           shortDescription: newPost.shortDescription,
           content: newPost.content,
-          bloggerId: newPost.bloggerId,
+          blogId: newPost.blogId,
         },
       },
     );

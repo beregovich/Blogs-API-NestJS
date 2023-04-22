@@ -1,7 +1,6 @@
-
-import { Injectable } from "@nestjs/common";
-import { InjectDataSource } from "@nestjs/typeorm";
-import { DataSource } from "typeorm";
+import { Injectable } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class TestingSQLRepository {
@@ -11,8 +10,8 @@ export class TestingSQLRepository {
   ) {}
   async deleteAllData() {
     await this.dataSource.query(`
-    TRUNCATE "Bloggers", "Users" CASCADE;
-    `)
+    TRUNCATE "blogs", "Users" CASCADE;
+    `);
     return null;
   }
 }

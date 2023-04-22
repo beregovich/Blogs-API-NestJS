@@ -21,14 +21,14 @@ export class PostsService {
     page: number,
     pageSize: number,
     searchNameTerm: string,
-    bloggerId: string | null,
+    blogId: string | null,
     userId,
   ) {
     const postsToSend = this.postsRepository.getPosts(
       page,
       pageSize,
       searchNameTerm,
-      bloggerId,
+      blogId,
       userId,
     );
     return postsToSend;
@@ -76,7 +76,7 @@ export interface IPostsRepository {
     page: number,
     pageSize: number,
     searchNameTerm: string,
-    bloggerId: string | null,
+    blogId: string | null,
     userId: string | null,
   ): Promise<EntityWithPaginationType<PostType[]>>;
 
@@ -100,7 +100,7 @@ export interface IPostsRepository {
 
 // @Injectable()
 // export class PostsService {
-//   create(createPostDto: CreateBloggerDto) {
+//   create(createPostDto: CreateBlogDto) {
 //     return 'This action adds a new post';
 //   }
 //

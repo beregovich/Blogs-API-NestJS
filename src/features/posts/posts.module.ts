@@ -3,16 +3,16 @@
 // import { PostsController } from './posts.controller';
 // import { PostsRepository } from './posts.repository';
 // import { MongooseModule } from '@nestjs/mongoose';
-// import { BloggersSchema, PostsSchema } from '../database/db';
-// import { BloggersModule } from '../bloggers/bloggers.module';
+// import { blogsSchema, PostsSchema } from '../database/db';
+// import { BlogsModule } from '../blogs/blogs.module';
 //
 // @Module({
 //   imports: [
 //     MongooseModule.forFeature([
 //       { name: 'Posts', schema: PostsSchema },
-//       { name: 'Bloggers', schema: BloggersSchema },
+//       { name: 'blogs', schema: blogsSchema },
 //     ]),
-//     forwardRef(() => BloggersModule),
+//     forwardRef(() => BlogsModule),
 //   ],
 //   controllers: [PostsController],
 //   providers: [PostsService, PostsRepository],

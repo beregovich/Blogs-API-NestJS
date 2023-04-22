@@ -68,7 +68,7 @@ export class PostsController {
   @UseGuards(BaseAuthGuard)
   @Post('/')
   async createPost(@Body() newPost: PostType) {
-    //does not find blogger for check 404
+    //does not find blog for check 404
     return await this.postsService.createPost(newPost);
   }
   @UseGuards(JwtPayloadExtractorGuard)
