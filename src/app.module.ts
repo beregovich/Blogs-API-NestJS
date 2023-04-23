@@ -90,17 +90,14 @@ interface IPostgresConfig {
             return configService.get<TypeOrmModuleOptions>(
               'RawSqlHerokuConfig',
             );
-            break;
           case 'TypeOrm':
             return configService.get<TypeOrmModuleOptions>(
               'TypeOrmHerokuConfig',
             );
-            break;
           default:
             return configService.get<TypeOrmModuleOptions>(
               'TypeOrmHerokuConfig',
             );
-            break;
         }
       },
       inject: [ConfigService],
