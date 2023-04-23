@@ -1,27 +1,33 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { isAfter } from 'date-fns';
 import * as jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcrypt';
 import { UsersRepository } from '../users/users.repository';
-import { EmailService } from '../../infrastructure/notification/email.service';
-import { emailTemplateService } from '../../infrastructure/notification/email.manager';
+import { EmailService } from '../../infrastructure/notifications/email/email.service';
+import { emailTemplateService } from '../../infrastructure/notifications/email/email.manager';
+import { AppSettings } from '../../settings/app-settings';
 
 @Injectable()
 export class AuthService {
   constructor(
     private emailService: EmailService,
     private usersRepository: UsersRepository,
+    @Inject(AppSettings.name)
+    private readonly appSettings: AppSettings,
   ) {}
 
   createJwtTokensPair(userId: string, login: string | null) {
-    const secretKey = process.env.JWT_SECRET_KEY || 'topSecretKey';
+    const accessSecretKey = this.appSettings.auth.ACCESS_JWT_SECRET_KEY;
+    const refreshSecretKey = this.appSettings.auth.REFRESH_JWT_SECRET_KEY;
     const payload: { userId: string; date: Date; login: string | null } = {
       userId,
       date: new Date(),
       login,
     };
-    const accessToken = jwt.sign(payload, secretKey, { expiresIn: '1d' });
-    const refreshToken = jwt.sign(payload, secretKey, { expiresIn: '30d' });
+    const accessToken = jwt.sign(payload, accessSecretKey, { expiresIn: '1d' });
+    const refreshToken = jwt.sign(payload, refreshSecretKey, {
+      expiresIn: '30d',
+    });
     return {
       accessToken,
       refreshToken,
@@ -64,14 +70,8 @@ export class AuthService {
     }
   }
 
-  async _generateHash(password: string) {
-    const hash = await bcrypt.hash(password, 10);
-    return hash;
-  }
-
   async _isPasswordCorrect(password: string, hash: string) {
-    const isEqual = await bcrypt.compare(password, hash);
-    return isEqual;
+    return bcrypt.compare(password, hash);
   }
 
   async confirmEmail(code: string): Promise<boolean> {

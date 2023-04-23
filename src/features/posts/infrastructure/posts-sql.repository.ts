@@ -2,8 +2,7 @@ import { PostType } from '../../../types/types';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { IPostsRepository } from '../posts.service';
 
-import { InjectModel } from '@nestjs/mongoose';
-import { BlogsService } from '../../blogs/application/blogs.service';
+
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 

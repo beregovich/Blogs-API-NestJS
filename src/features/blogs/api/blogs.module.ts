@@ -3,11 +3,11 @@ import { BlogsController } from './blogs.controller';
 import { BlogsService } from '../application/blogs.service';
 import { BlogsMongoRepository } from '../infrastructure/blogs-mongo.repository';
 import { MongooseModule } from '@nestjs/mongoose';
-import { blogsSchema } from '../../../infrastructure/database/db';
+import { BlogsSchema } from '../../../infrastructure/database/models';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: 'Blogs', schema: blogsSchema }]),
+    MongooseModule.forFeature([{ name: 'Blogs', schema: BlogsSchema }]),
   ],
   controllers: [BlogsController],
   providers: [BlogsService, BlogsMongoRepository],
