@@ -1,4 +1,4 @@
-import { UsersRepository } from '../../features/users/users.repository';
+import { UsersRepository } from '../../modules/users/infrastructure/users.repository';
 import { LimitsRepository } from './limits-control.repository';
 import { ObjectId } from 'mongodb';
 import { ErrorMessageType } from '../../types/types';

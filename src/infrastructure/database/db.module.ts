@@ -10,11 +10,13 @@ import {
 import {
   CommentsLikesSchema,
   PostsLikesSchema,
-} from '../../features/likes/infrastructure/likes.schema';
+} from '../../modules/likes/infrastructure/likes.schema';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Blog } from '../../features/blogs/entities/blog.entity';
+import { Blog } from '../../modules/blogs/entities/blog.entity';
 import { AppSettings } from '../../settings/app-settings';
 import { ConfigModule } from '../../settings/config.module';
+import { User } from '../../modules/users/entities/user.entity';
+import { Post } from '../../modules/posts/entities/post.entity';
 
 @Global()
 @Module({
@@ -28,13 +30,13 @@ import { ConfigModule } from '../../settings/config.module';
         username: appSettings.database.POSTGRES_USER,
         password: appSettings.database.POSTGRES_PASSWORD,
         database: appSettings.database.POSTGRES_DATABASE,
-        autoLoadEntities: false,
+        autoLoadEntities: true,
         synchronize: true,
         ssl: { rejectUnauthorized: false },
       }),
       inject: [AppSettings.name],
     }),
-    TypeOrmModule.forFeature([Blog]),
+    TypeOrmModule.forFeature([Blog, Post, User]),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (appSettings: AppSettings) => ({

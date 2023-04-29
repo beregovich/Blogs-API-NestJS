@@ -6,8 +6,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { PostsService } from '../../features/posts/posts.service';
-import { CommentsService } from '../../features/comments/comments.service';
+import { PostsService } from '../../modules/posts/posts.service';
+import { CommentsService } from '../../modules/comments/comments.service';
 
 @Injectable()
 export class CheckCommentExistingGuard implements CanActivate {

@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { PostsService } from '../../features/posts/posts.service';
+import { PostsService } from '../../modules/posts/posts.service';
 
 @Injectable()
 export class CheckPostExistingGuard implements CanActivate {

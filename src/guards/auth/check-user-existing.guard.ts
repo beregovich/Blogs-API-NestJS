@@ -4,7 +4,7 @@ import {
   ExecutionContext,
 } from '@nestjs/common';
 import { LimitsRepository } from '../limits/limits-control.repository';
-import { UsersRepository } from '../../features/users/users.repository';
+import { UsersRepository } from '../../modules/users/infrastructure/users.repository';
 
 export class LimitsControlGuard implements CanActivate {
   constructor(
