@@ -7,51 +7,25 @@ import { DataSource, Repository } from 'typeorm';
 import { Blog } from '../entities/blog.entity';
 
 @Injectable()
-export class BlogsTypeOrmRepository implements IBlogsRepository {
+export class BlogsRepository implements IBlogsRepository {
   constructor(
     @InjectRepository(Blog)
     private readonly blogRepo: Repository<Blog>,
     @InjectDataSource()
     private readonly dataSource: DataSource,
   ) {}
-  //2nd No metadata for blog
-  // private readonly blogRepo: Repository<blog>;
-  // constructor(
-  //   @InjectDataSource()
-  //   private readonly dataSource: DataSource,
-  // ) {
-  //   this.blogRepo = this.dataSource.getRepository<blog>(blog);
-  // }
 
   async getBlogs(
     page: number,
     pageSize: number,
     searchNameTerm: string,
   ): Promise<EntityWithPaginationType<BlogType[]>> {
-    const searchTerm = searchNameTerm ? searchNameTerm : '';
-    const blog = await this.dataSource.query(
-      `
-    SELECT to_jsonb("blogs") FROM "blogs"
-    WHERE "name" like $3
-    ORDER BY "name" DESC
-    OFFSET $1 ROWS FETCH NEXT $2 ROWS ONLY
-    `,
-      [(page - 1) * pageSize, pageSize, `%${searchTerm}%`],
-    );
-    const totalCount = await this.dataSource.query(
-      `SELECT COUNT(name) FROM public."blogs"
-              WHERE "name" like $1`,
-      [`%${searchTerm}%`],
-    );
-    const items: BlogType[] = [];
-    blog.forEach((b) => items.push(b.to_jsonb));
-    const pagesCount = Math.ceil(totalCount[0].count / pageSize);
     return {
-      pagesCount,
+      pagesCount: 0,
       page,
       pageSize,
-      totalCount: parseInt(totalCount[0].count),
-      items,
+      totalCount: 0,
+      items: [],
     };
   }
 

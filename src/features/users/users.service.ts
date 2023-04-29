@@ -6,17 +6,16 @@ import {
 } from '../../types/types';
 import { addHours } from 'date-fns';
 import { Injectable } from '@nestjs/common';
-import { EmailService } from '../../infrastructure/notification/email.service';
-import { AuthService } from '../auth/auth.service';
-import { emailTemplateService } from '../../infrastructure/notification/email.manager';
+import { EmailService } from '../../infrastructure/notifications/email/email.service';
+import { emailTemplateService } from '../../infrastructure/notifications/email/email.manager';
 import jwt from 'jsonwebtoken';
 import { UsersRepository } from './users.repository';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
   constructor(
     private usersRepository: UsersRepository,
-    private authService: AuthService,
     private emailService: EmailService,
   ) {}
 
@@ -39,7 +38,7 @@ export class UsersService {
     password: string,
     email: string,
   ): Promise<UserViewType | null> {
-    const passwordHash = await this.authService._generateHash(password);
+    const passwordHash = await this._generateHash(password);
     const newUser: UserType = {
       accountData: {
         id: uuidv4(),
@@ -94,6 +93,10 @@ export class UsersService {
       console.log('Decoding error: e');
       return null;
     }
+  }
+  private async _generateHash(password: string) {
+    const hash = await bcrypt.hash(password, 10);
+    return hash;
   }
 }
 

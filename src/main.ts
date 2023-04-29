@@ -1,35 +1,20 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { runDb } from './infrastructure/database/db';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './exception.filter';
 import * as cookieParser from 'cookie-parser';
-import { ConfigService } from '@nestjs/config';
 
 interface ISetModalState {
-  (value: boolean): string
+  (value: boolean): string;
 }
 
-const setModaState = (a: boolean): string  =>{
-  return 'ok'
-}
+const setModaState = (a: boolean): string => {
+  return 'ok';
+};
 function ModalWindow(setModaState: ISetModalState): string {
   return 'ok';
 }
 ModalWindow(setModaState);
-
-
-interface IPostgresConfig {
-  type: string;
-  host: string;
-  port: number;
-  username: string;
-  password: string;
-  database: string;
-  autoLoadEntities: boolean;
-  synchronize: boolean;
-  ssl: { rejectUnauthorized: boolean };
-}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

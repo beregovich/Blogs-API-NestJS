@@ -1,187 +1,181 @@
-import { BlogType, LikeAction, PostType } from '../../../types/types';
-import mongoose from 'mongoose';
-import {
-  BadRequestException,
-  HttpException,
-  HttpStatus,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { PostType } from '../../../types/types';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { IPostsRepository } from '../posts.service';
-import { InjectModel } from '@nestjs/mongoose';
-import { BlogsService } from '../../blogs/application/blogs.service';
-import { UsersService } from '../../users/users.service';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
-export class PostsMongoRepository implements IPostsRepository {
+export class PostsRepository implements IPostsRepository {
   constructor(
-    @InjectModel('Posts') private postsModel,
-    @InjectModel('blogs') private blogsModel,
-    private readonly usersService: UsersService,
-    private readonly blogsService: BlogsService,
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
   ) {}
-  private defaultLikesInfo: {
-    dislikesCount: 0;
-    likesCount: 0;
-    myStatus: 'None';
-    newestLikes: [];
-  };
 
   async getPosts(
     page: number,
     pageSize: number,
     searchNameTerm: string,
     blogId: string | null,
-    userId: string | null,
+    userId: string,
   ) {
-    const filter = blogId
-      ? { title: { $regex: searchNameTerm ? searchNameTerm : '' }, blogId }
-      : { title: { $regex: searchNameTerm ? searchNameTerm : '' } };
-    const totalCount = await this.postsModel.countDocuments(filter);
-    const pagesCount = Math.ceil(totalCount / pageSize);
-    const allPosts = await this.postsModel
-      .find(filter, {
-        _id: 0,
-        __v: 0,
-        PostsLikes: 0,
-        'extendedLikesInfo._id': 0,
-      })
-      .skip((page - 1) * pageSize)
-      .limit(pageSize)
-      .lean();
-    const formattedPosts = allPosts.map((post) => {
-      const likes = post.extendedLikesInfo;
-      const currentUserLikeStatus = likes.find((l) => l.userId === userId);
-      const likesCount = likes.filter((l) => l.action === 'Like').length;
-      const dislikesCount = likes.filter((l) => l.action === 'Dislike').length;
-      return {
-        id: post.id,
-        title: post.title,
-        shortDescription: post.shortDescription,
-        content: post.content,
-        blogId: post.blogId,
-        addedAt: post.addedAt,
-        blogName: post.blogName,
-        extendedLikesInfo: {
-          likesCount: likesCount,
-          dislikesCount: dislikesCount,
-          myStatus: currentUserLikeStatus
-            ? currentUserLikeStatus.action
-            : 'None',
-          newestLikes: likes
-            .filter((l) => l.action === 'Like')
-            .reverse()
-            .slice(0, 3)
-            .map((like) => ({
-              addedAt: like.addedAt,
-              userId: like.userId,
-              login: like.login,
-            })),
-        },
-      };
-    });
+    const filterByblog = blogId ? blogId : '';
+    const totalCount = await this.dataSource.query(
+      `SELECT COUNT(id) FROM public."Posts"
+              WHERE "title" like $1 
+              AND "blogId" like $2`,
+      [`%${searchNameTerm}%`, `%${filterByblog}%`],
+    );
+    const pagesCount = Math.ceil(totalCount[0].count / pageSize);
+    const allPosts = await this.dataSource.query(
+      `
+    SELECT to_jsonb("Posts") FROM "Posts"
+    WHERE "title" like $1
+    AND "blogId" like $2
+    ORDER BY "title" DESC
+    OFFSET $3 ROWS FETCH NEXT $4 ROWS ONLY
+    `,
+      [
+        `%${searchNameTerm}%`,
+        `%${filterByblog}%`,
+        (page - 1) * pageSize,
+        pageSize,
+      ],
+    );
+    const items: PostType[] = [];
     return {
       pagesCount,
       page,
       pageSize,
       totalCount,
-      items: formattedPosts,
+      items: allPosts,
     };
   }
 
   async getPostById(id: string) {
-    const post = await this.postsModel.findOne({ id }, { _id: 0, __v: 0 });
+    const post = await this.dataSource.query(
+      `
+      SELECT to_jsonb("Posts"),
+         (SELECT name FROM "blogs"
+         WHERE "blogId" = Posts.blogId) AS blogName
+      FROM "blogs"
+      WHERE "id" = $1
+      `,
+      [id],
+    );
     if (!post) return null;
-    const blog = await this.blogsService.getBlogById(post.blogId);
-    if (!blog) return null;
-    const blogName = blog.name;
+    const postDocument = post[0].to_jsonb;
     return {
-      addedAt: post.addedAt,
-      id: post.id,
-      title: post.title,
-      shortDescription: post.shortDescription,
-      content: post.content,
-      blogId: post.blogId,
-      blogName,
-      extendedLikesInfo: this.defaultLikesInfo,
+      id: postDocument.id,
+      title: postDocument.title,
+      shortDescription: postDocument.shortDescription,
+      content: postDocument.content,
+      blogId: postDocument.blogId,
+      blogName: postDocument.blogName,
+      addedAt: postDocument.addetAt,
+      extendedLikesInfo: {
+        dislikesCount: 0,
+        likesCount: 0,
+        myStatus: 'None',
+        newestLikes: [],
+      },
     };
   }
 
-  async getPostWithLikesById(id: string, userId) {
-    const post = await this.postsModel
-      .findOne(
-        { id },
-        {
-          _id: 0,
-          __v: 0,
-          'extendedLikesInfo._id': 0,
-        },
-      )
-      .lean();
-    if (!post) throw new NotFoundException();
-    const likes = post.extendedLikesInfo;
-    const currentUserLikeStatus = likes.find((l) => l.userId === userId);
-    const blog = await this.blogsService.getBlogById(post.blogId);
-    if (!blog) throw new NotFoundException();
-    const blogName = blog?.name;
-    const likesCount = likes.filter((l) => l.action === 'Like').length;
-    const dislikesCount = likes.filter((l) => l.action === 'Dislike').length;
+  async getPostWithLikesById(postId: string, userId: string) {
+    const post = await this.dataSource.query(
+      `
+      SELECT P."id", P."title", B."name" AS blogName,
+         /*(SELECT name FROM "blogs"
+         WHERE "id" = P."blogId") AS blogName,*/
+         COALESCE((SELECT COUNT(*) FROM "PostsLikes"
+            GROUP BY "id"
+            HAVING "likeStatus" = 'Like' 
+            AND "postId" = P."id"), 0) AS likesCount,
+         COALESCE((SELECT COUNT(*) FROM "PostsLikes"
+            GROUP BY id
+            HAVING "likeStatus" = 'Dislike'
+            AND "postId" = P."id"), 0) AS dislikesCount,
+         COALESCE((SELECT "likeStatus" FROM "PostsLikes"
+            WHERE "postId" = P."id"
+            AND "userId" = $2), 'None') AS myStatus
+      FROM "Posts" AS P INNER JOIN "blogs" AS B ON P."blogId" = B."id"
+      WHERE P."id" = $1
+      `,
+      [postId, null],
+    );
+    if (post) {
+      return post[0].to_jsonb;
+    } else return null;
+    if (!post) return false;
     return {
-      addedAt: post.addedAt,
       id: post.id,
       title: post.title,
       shortDescription: post.shortDescription,
       content: post.content,
       blogId: post.blogId,
-      blogName,
-      extendedLikesInfo: {
-        likesCount: likesCount,
-        dislikesCount: dislikesCount,
-        myStatus: currentUserLikeStatus ? currentUserLikeStatus.action : 'None',
-        newestLikes: likes
-          .filter((l) => l.action === 'Like')
-          .reverse()
-          .slice(0, 3)
-          .map((l) => {
-            delete l.action;
-            return l;
-          }),
-        //extendedLikesInfo: this.defaultLikesInfo,
-      },
+      blogName: post.blogName,
     };
   }
 
   async createPost(newPost: PostType): Promise<PostType | null> {
-    const currentDate = new Date();
-    const blog = await this.blogsModel.findOne({ id: newPost.blogId });
-    if (!blog) return null;
-    await this.postsModel.create({
-      ...newPost,
-      blogName: blog.name,
-      addedAt: currentDate,
-    });
-    const postToReturn = await this.getPostWithLikesById(newPost.id, null);
-    return postToReturn;
+    await this.dataSource.query(
+      `
+    INSERT INTO "Posts" ("id", "title", "shortDescription", "content", "blogId")
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING ("id", "title", "shortDescription", "content", "blogId");
+    `,
+      [
+        newPost.id,
+        newPost.title,
+        newPost.shortDescription,
+        newPost.content,
+        newPost.blogId,
+      ],
+    );
+    const blog = await this.dataSource.query(
+      `
+      SELECT to_jsonb("Posts") FROM "Posts"
+      WHERE id = $1
+      `,
+      [newPost.id],
+    );
+    return blog[0].to_jsonb;
   }
 
   async updatePostById(id: string, newPost: PostType) {
-    const result = await this.postsModel.updateOne(
-      { id },
-      {
-        $set: {
-          title: newPost.title,
-          shortDescription: newPost.shortDescription,
-          content: newPost.content,
-          blogId: newPost.blogId,
-        },
-      },
+    const result = await this.dataSource.query(
+      `
+    UPDATE "Posts"
+    SET "title"=$1, 
+    "shortDescription"=$2, 
+    "content"=$3, 
+    "blogId"=$4
+    WHERE id = $5
+    `,
+      [
+        newPost.title,
+        newPost.shortDescription,
+        newPost.content,
+        newPost.blogId,
+        id,
+      ],
     );
-    return result.modifiedCount === 1;
+    if (result[1] === 0)
+      throw new NotFoundException({ field: 'id', message: 'not found' });
+    return null;
   }
 
   async deletePostById(id: string) {
-    const result = await this.postsModel.deleteOne({ id });
-    return result.deletedCount === 1;
+    const result = await this.dataSource.query(
+      `
+    DELETE FROM "Posts"
+    WHERE id = $1
+    `,
+      [id],
+    );
+    if (result[1] === 0)
+      throw new NotFoundException({ field: 'id', message: 'not found' });
+    return null;
   }
 
   async updatePostLike(
@@ -190,41 +184,6 @@ export class PostsMongoRepository implements IPostsRepository {
     postId: string,
     addedAt: Date,
   ) {
-    if (
-      action == LikeAction.Like ||
-      action == LikeAction.Dislike ||
-      action == LikeAction.None
-    ) {
-      await this.postsModel.updateOne(
-        {
-          id: postId,
-        },
-        { $pull: { extendedLikesInfo: { userId } } },
-      );
-    } else {
-      throw new HttpException(
-        { message: [{ field: 'likeStatus', message: 'wrong value' }] },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    if (action == LikeAction.Like || action == LikeAction.Dislike) {
-      const user = await this.usersService.getUserById(userId);
-      if (!user) throw new NotFoundException('User from jwt not found');
-      const result = await this.postsModel.updateOne(
-        { id: postId },
-        {
-          $push: {
-            extendedLikesInfo: {
-              action: action,
-              userId: userId,
-              login: user.accountData.login,
-              addedAt,
-            },
-          },
-        },
-      );
-      if (result.matchedCount == 0) throw new BadRequestException();
-      return result;
-    }
+    return null;
   }
 }

@@ -1,21 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Inject, Injectable } from '@nestjs/common';
-import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
-import {
-  EntityWithPaginationType,
-  LikeAction,
-  NewestLikesType,
-  PostType,
-} from '../../types/types';
-import { PostsMongoRepository } from './infrastructure/posts.repository';
-import { PostsSqlRepository } from './infrastructure/posts-sql.repository';
+import { EntityWithPaginationType, PostType } from '../../types/types';
+import { PostsRepository } from './infrastructure/posts.repository';
 
 @Injectable()
 export class PostsService {
-  constructor(
-    @Inject('PostsRepository') private postsRepository: IPostsRepository,
-  ) {}
+  constructor(private readonly postsRepository: PostsRepository) {}
 
   async getPosts(
     page: number,

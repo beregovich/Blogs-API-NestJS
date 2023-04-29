@@ -1,13 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { BadRequestException, Inject, Injectable, Scope } from '@nestjs/common';
 import { BlogType, EntityWithPaginationType } from '../../../types/types';
+import { BlogsRepository } from '../infrastructure/blogs-typeOrm.repository';
 
 @Injectable({ scope: Scope.TRANSIENT })
 export class BlogsService {
-  constructor(
-    @Inject('BlogsRepository')
-    private blogsRepository: IBlogsRepository,
-  ) {}
+  constructor(private blogsRepository: BlogsRepository) {}
 
   async getBlogs(page: number, pageSize: number, searchNameTerm: string) {
     return this.blogsRepository.getBlogs(page, pageSize, searchNameTerm);

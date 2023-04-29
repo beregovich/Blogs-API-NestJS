@@ -1,23 +1,16 @@
 import 'dotenv/config';
-import mongoose, { Schema } from 'mongoose';
+import mongoose from 'mongoose';
 import {
   BlogType,
   CommentType,
   EmailConfirmationMessageType,
   EmailConfirmationType,
-  LikeAction,
-  LimitsControlType,
-  PostType,
-  SentConfirmationEmailType,
   UserAccountType,
   UserType,
 } from '../../types/types';
-import { Prop } from '@nestjs/mongoose';
-
-const mongoUri = process.env.mongoURI || '';
 
 //Schemas
-export const blogsSchema = new mongoose.Schema<BlogType>({
+export const BlogsSchema = new mongoose.Schema<BlogType>({
   id: String,
   name: String,
   youtubeUrl: String,
@@ -49,10 +42,6 @@ const userAccountDataSchema = new mongoose.Schema<UserAccountType>({
   createdAt: Date,
   revokedTokens: { type: [String], required: false },
 });
-const userSentConfirmationEmailSchema =
-  new mongoose.Schema<SentConfirmationEmailType>({
-    sentDate: Date,
-  });
 const userEmailConfirmationSchema = new mongoose.Schema<EmailConfirmationType>({
   isConfirmed: Boolean,
   confirmationCode: String,
@@ -60,12 +49,12 @@ const userEmailConfirmationSchema = new mongoose.Schema<EmailConfirmationType>({
   //sentEmails: userSentConfirmationEmailSchema
   sentEmails: { type: [Date], required: false },
 });
-export const usersSchema = new mongoose.Schema<UserType>({
+export const UsersSchema = new mongoose.Schema<UserType>({
   accountData: userAccountDataSchema,
   emailConfirmation: userEmailConfirmationSchema,
 });
 
-export const commentsSchema = new mongoose.Schema<CommentType>({
+export const CommentsSchema = new mongoose.Schema<CommentType>({
   id: String,
   content: String,
   postId: String,
@@ -75,12 +64,7 @@ export const commentsSchema = new mongoose.Schema<CommentType>({
   likesInfo: [LikesSchema],
 });
 
-export const limitsSchema = new mongoose.Schema<LimitsControlType>({
-  userIp: String,
-  url: String,
-  time: Date,
-});
-export const emailsQueueSchema =
+export const EmailsQueueSchema =
   new mongoose.Schema<EmailConfirmationMessageType>({
     email: String,
     message: String,
@@ -88,13 +72,3 @@ export const emailsQueueSchema =
     isSent: Boolean,
     createdAt: Date,
   });
-
-export async function runDb() {
-  try {
-    await mongoose.connect(mongoUri);
-    const connectionId = mongoose.connection.id;
-    console.log('Mongoose connection complete with id: ', connectionId);
-  } catch (e) {
-    console.log('No connection, error: ', e);
-  }
-}
